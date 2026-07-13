@@ -157,6 +157,15 @@ input:focus,select:focus{outline:2px solid var(--accent-soft);border-color:var(-
 .pv{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:none;text-align:center;box-shadow:var(--shadow)}
 .pv-cap{font-size:.8rem;color:var(--ink-soft);margin-bottom:10px}
 .pv canvas{max-width:100%;max-height:70vh;width:auto;height:auto;border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.swatches{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.sw:hover{transform:scale(1.1)}
+.sw.on{outline:3px solid var(--accent);outline-offset:2px}
+.sw-white{border-color:#c9c1b4}
+input[type=color]{
+  width:46px;height:32px;padding:2px;border:1px solid var(--line);border-radius:8px;
+  background:#fff;cursor:pointer;min-width:46px;
+}
 .run-bar{margin-top:24px;display:none;text-align:center}
 .btn-primary{
   font-family:inherit;font-size:1rem;font-weight:700;letter-spacing:.05em;
@@ -305,7 +314,7 @@ const I18N = {
 "ui.preview":"預覽(第 1 頁效果)",
 "ui.noteDel":"👆 點選縮圖標記要刪除的頁面,再點一次取消;下方欄位會同步更新",
 "ui.noteExt":"👆 點選縮圖選擇要保留的頁面;下方欄位會同步更新",
-"ui.noteSplit":"✂ 點選頁面即在「該頁之後」加上分割點;下方欄位會同步顯示各段範圍",
+"ui.noteSplit":"✂ 想從哪裡切開,就點那一頁。例如點第 3 頁,檔案就會分成「第 1-3 頁」和「第 4 頁以後」兩份;點越多頁就切成越多份,再點一次可取消",
 "cat.all":"全部","cat.organize":"整理 PDF","cat.optimize":"優化 PDF","cat.convert":"PDF 轉換","cat.edit":"編輯 PDF",
 "merge.n":"合併 PDF","merge.d":"將多個 PDF 依你排定的順序合併成一份文件。","merge.h":"選好檔案後,拖曳下方縮圖即可調整合併順序",
 "reorder.n":"頁面排序","reorder.d":"用滑鼠拖曳頁面縮圖,重新排列同一份 PDF 的頁面順序。","reorder.h":"電腦以滑鼠拖曳;手機長按縮圖 0.5 秒後拖曳;微調可用縮圖上的 ◀ ▶ 按鈕",
@@ -331,7 +340,7 @@ const I18N = {
 "o.pnTitle":"頁碼設定","o.pos":"位置","o.bc":"下方置中","o.br":"右下角","o.bl":"左下角","o.fmt":"格式","o.fs":"字級",
 "o.cropTitle":"裁剪設定(由各邊向內裁切,單位:mm)","o.top":"上邊","o.bottom":"下邊","o.left":"左邊","o.right":"右邊",
 "o.wmTitle":"浮水印設定","o.type":"類型","o.text":"文字","o.image":"圖片 / Logo","o.wmPh":"支援任何語言,例:內部資料 / CONFIDENTIAL","o.wmDefault":"機密文件",
-"o.color":"顏色","o.gray":"灰","o.red":"紅","o.blue":"藍","o.green":"綠",
+"o.color":"顏色","o.black":"黑","o.white":"白","o.custom":"自訂顏色","o.gray":"灰","o.red":"紅","o.blue":"藍","o.green":"綠",
 "o.logoFile":"Logo 圖檔","o.logoW":"Logo 寬度","o.pw":"頁寬 {p}%",
 "o.opacity":"透明度","o.light":"淡","o.mid":"中","o.dark":"深",
 "o.horiz":"水平","o.diag":"斜向 45°","o.layout":"排列","o.center":"置中單一","o.tile":"整頁平鋪",
@@ -373,7 +382,7 @@ const I18N = {
 "ui.preview":"预览(第 1 页效果)",
 "ui.noteDel":"👆 点选缩略图标记要删除的页面,再点一次取消;下方栏位会同步更新",
 "ui.noteExt":"👆 点选缩略图选择要保留的页面;下方栏位会同步更新",
-"ui.noteSplit":"✂ 点选页面即在「该页之后」加上分割点;下方栏位会同步显示各段范围",
+"ui.noteSplit":"✂ 想从哪里切开,就点那一页。例如点第 3 页,文件就会分成「第 1-3 页」和「第 4 页以后」两份;点越多页就切成越多份,再点一次可取消",
 "cat.all":"全部","cat.organize":"整理 PDF","cat.optimize":"优化 PDF","cat.convert":"PDF 转换","cat.edit":"编辑 PDF",
 "merge.n":"合并 PDF","merge.d":"将多个 PDF 按你排定的顺序合并成一份文件。","merge.h":"选好文件后,拖拽下方缩略图即可调整合并顺序",
 "reorder.n":"页面排序","reorder.d":"用鼠标拖拽页面缩略图,重新排列同一份 PDF 的页面顺序。","reorder.h":"电脑以鼠标拖拽;手机长按缩略图 0.5 秒后拖拽;微调可用缩略图上的 ◀ ▶ 按钮",
@@ -399,7 +408,7 @@ const I18N = {
 "o.pnTitle":"页码设置","o.pos":"位置","o.bc":"下方居中","o.br":"右下角","o.bl":"左下角","o.fmt":"格式","o.fs":"字号",
 "o.cropTitle":"裁剪设置(由各边向内裁切,单位:mm)","o.top":"上边","o.bottom":"下边","o.left":"左边","o.right":"右边",
 "o.wmTitle":"水印设置","o.type":"类型","o.text":"文字","o.image":"图片 / Logo","o.wmPh":"支持任何语言,例:内部资料 / CONFIDENTIAL","o.wmDefault":"机密文件",
-"o.color":"颜色","o.gray":"灰","o.red":"红","o.blue":"蓝","o.green":"绿",
+"o.color":"颜色","o.black":"黑","o.white":"白","o.custom":"自定义颜色","o.gray":"灰","o.red":"红","o.blue":"蓝","o.green":"绿",
 "o.logoFile":"Logo 图档","o.logoW":"Logo 宽度","o.pw":"页宽 {p}%",
 "o.opacity":"透明度","o.light":"淡","o.mid":"中","o.dark":"深",
 "o.horiz":"水平","o.diag":"斜向 45°","o.layout":"排列","o.center":"居中单一","o.tile":"整页平铺",
@@ -441,7 +450,7 @@ const I18N = {
 "ui.preview":"Preview (page 1)",
 "ui.noteDel":"👆 Tap thumbnails to mark pages for deletion; tap again to undo — the field below stays in sync",
 "ui.noteExt":"👆 Tap thumbnails to choose the pages to keep — the field below stays in sync",
-"ui.noteSplit":"✂ Tap a page to add a split point right after it — the ranges below update automatically",
+"ui.noteSplit":"✂ Tap the page where you want to cut. E.g. tap page 3 and the file splits into pages 1-3 and pages 4 onward; tap more pages for more parts, tap again to undo",
 "cat.all":"All","cat.organize":"Organize","cat.optimize":"Optimize","cat.convert":"Convert","cat.edit":"Edit",
 "merge.n":"Merge PDF","merge.d":"Combine multiple PDFs into one, in the order you choose.","merge.h":"Drag the thumbnails below to set the merge order",
 "reorder.n":"Reorder pages","reorder.d":"Drag page thumbnails to rearrange the pages of a PDF.","reorder.h":"Drag with the mouse; on mobile, long-press a thumbnail then drag; use ◀ ▶ for fine-tuning",
@@ -467,7 +476,7 @@ const I18N = {
 "o.pnTitle":"Page number settings","o.pos":"Position","o.bc":"Bottom center","o.br":"Bottom right","o.bl":"Bottom left","o.fmt":"Format","o.fs":"Font size",
 "o.cropTitle":"Crop margins (from each edge, in mm)","o.top":"Top","o.bottom":"Bottom","o.left":"Left","o.right":"Right",
 "o.wmTitle":"Watermark settings","o.type":"Type","o.text":"Text","o.image":"Image / Logo","o.wmPh":"Any language, e.g. CONFIDENTIAL","o.wmDefault":"CONFIDENTIAL",
-"o.color":"Color","o.gray":"Gray","o.red":"Red","o.blue":"Blue","o.green":"Green",
+"o.color":"Color","o.black":"Black","o.white":"White","o.custom":"Custom color","o.gray":"Gray","o.red":"Red","o.blue":"Blue","o.green":"Green",
 "o.logoFile":"Logo file","o.logoW":"Logo width","o.pw":"{p}% of page width",
 "o.opacity":"Opacity","o.light":"Light","o.mid":"Medium","o.dark":"Dark",
 "o.horiz":"Horizontal","o.diag":"Diagonal 45°","o.layout":"Layout","o.center":"Single, centered","o.tile":"Tiled",
@@ -509,7 +518,7 @@ const I18N = {
 "ui.preview":"プレビュー(1ページ目)",
 "ui.noteDel":"👆 サムネイルをタップして削除するページを選択(再タップで解除)。下の欄も連動します",
 "ui.noteExt":"👆 サムネイルをタップして残すページを選択。下の欄も連動します",
-"ui.noteSplit":"✂ ページをタップすると「その直後」に分割点を追加。下の範囲欄も自動更新されます",
+"ui.noteSplit":"✂ 切りたい場所のページをタップ。例:3ページ目をタップすると「1〜3ページ」と「4ページ以降」に分かれます。複数タップで複数分割、再タップで解除",
 "cat.all":"すべて","cat.organize":"整理","cat.optimize":"最適化","cat.convert":"変換","cat.edit":"編集",
 "merge.n":"PDF結合","merge.d":"複数のPDFを指定した順に1つに結合します。","merge.h":"下のサムネイルをドラッグして結合順を変更できます",
 "reorder.n":"ページ並べ替え","reorder.d":"サムネイルをドラッグしてページ順を変更します。","reorder.h":"マウスでドラッグ、モバイルでは長押ししてからドラッグ。微調整は ◀ ▶ ボタンで",
@@ -535,7 +544,7 @@ const I18N = {
 "o.pnTitle":"ページ番号設定","o.pos":"位置","o.bc":"下部中央","o.br":"右下","o.bl":"左下","o.fmt":"形式","o.fs":"サイズ",
 "o.cropTitle":"トリミング(各辺から内側へ、単位:mm)","o.top":"上","o.bottom":"下","o.left":"左","o.right":"右",
 "o.wmTitle":"透かし設定","o.type":"種類","o.text":"テキスト","o.image":"画像 / ロゴ","o.wmPh":"任意の言語、例:社外秘 / CONFIDENTIAL","o.wmDefault":"社外秘",
-"o.color":"色","o.gray":"グレー","o.red":"赤","o.blue":"青","o.green":"緑",
+"o.color":"色","o.black":"黒","o.white":"白","o.custom":"カスタム色","o.gray":"グレー","o.red":"赤","o.blue":"青","o.green":"緑",
 "o.logoFile":"ロゴ画像","o.logoW":"ロゴ幅","o.pw":"ページ幅の{p}%",
 "o.opacity":"透明度","o.light":"薄い","o.mid":"中","o.dark":"濃い",
 "o.horiz":"水平","o.diag":"斜め45°","o.layout":"配置","o.center":"中央に1つ","o.tile":"全面に敷き詰め",
@@ -577,7 +586,7 @@ const I18N = {
 "ui.preview":"미리보기 (1페이지)",
 "ui.noteDel":"👆 썸네일을 눌러 삭제할 페이지를 선택하세요(다시 누르면 해제). 아래 입력란과 연동됩니다",
 "ui.noteExt":"👆 썸네일을 눌러 남길 페이지를 선택하세요. 아래 입력란과 연동됩니다",
-"ui.noteSplit":"✂ 페이지를 누르면 '해당 페이지 뒤'에 분할점이 추가됩니다. 아래 범위란이 자동 갱신됩니다",
+"ui.noteSplit":"✂ 자르고 싶은 위치의 페이지를 누르세요. 예: 3페이지를 누르면 '1-3페이지'와 '4페이지 이후'로 나뉩니다. 여러 페이지를 누르면 여러 개로 분할, 다시 누르면 해제",
 "cat.all":"전체","cat.organize":"정리","cat.optimize":"최적화","cat.convert":"변환","cat.edit":"편집",
 "merge.n":"PDF 병합","merge.d":"여러 PDF를 원하는 순서로 하나로 병합합니다.","merge.h":"아래 썸네일을 드래그해 병합 순서를 조정하세요",
 "reorder.n":"페이지 순서 변경","reorder.d":"썸네일을 드래그해 페이지 순서를 바꿉니다.","reorder.h":"마우스로 드래그, 모바일에서는 길게 누른 뒤 드래그. 미세 조정은 ◀ ▶ 버튼",
@@ -603,7 +612,7 @@ const I18N = {
 "o.pnTitle":"페이지 번호 설정","o.pos":"위치","o.bc":"하단 가운데","o.br":"오른쪽 아래","o.bl":"왼쪽 아래","o.fmt":"형식","o.fs":"크기",
 "o.cropTitle":"자르기(각 가장자리 기준, 단위: mm)","o.top":"위","o.bottom":"아래","o.left":"왼쪽","o.right":"오른쪽",
 "o.wmTitle":"워터마크 설정","o.type":"유형","o.text":"텍스트","o.image":"이미지 / 로고","o.wmPh":"모든 언어 가능, 예: 대외비 / CONFIDENTIAL","o.wmDefault":"대외비",
-"o.color":"색상","o.gray":"회색","o.red":"빨강","o.blue":"파랑","o.green":"초록",
+"o.color":"색상","o.black":"검정","o.white":"흰색","o.custom":"사용자 지정","o.gray":"회색","o.red":"빨강","o.blue":"파랑","o.green":"초록",
 "o.logoFile":"로고 파일","o.logoW":"로고 너비","o.pw":"페이지 너비의 {p}%",
 "o.opacity":"투명도","o.light":"연하게","o.mid":"보통","o.dark":"진하게",
 "o.horiz":"수평","o.diag":"대각선 45°","o.layout":"배치","o.center":"가운데 1개","o.tile":"전체 반복",
@@ -778,6 +787,18 @@ const OPTION_BUILDERS = {
       </select>
       <label>${t("o.fs")}</label>
       <input type="number" id="pnSize" value="11" min="6" max="36" style="min-width:80px">
+    </div>
+    <div class="opt-row">
+      <label>${t("o.color")}</label>
+      <div class="swatches">
+        <button class="sw on" style="background:#000000" title="${t("o.black")}" onclick="setPnColor('#000000',this)"></button>
+        <button class="sw sw-white" style="background:#ffffff" title="${t("o.white")}" onclick="setPnColor('#ffffff',this)"></button>
+        <button class="sw" style="background:#6b7280" title="${t("o.gray")}" onclick="setPnColor('#6b7280',this)"></button>
+        <button class="sw" style="background:#b91c1c" title="${t("o.red")}" onclick="setPnColor('#b91c1c',this)"></button>
+        <button class="sw" style="background:#1d4ed8" title="${t("o.blue")}" onclick="setPnColor('#1d4ed8',this)"></button>
+        <button class="sw" style="background:#166534" title="${t("o.green")}" onclick="setPnColor('#166534',this)"></button>
+        <input type="color" id="pnColor" value="#000000" title="${t("o.custom")}" oninput="markPnSwatch(this.value)">
+      </div>
     </div>`,
   crop: () => `
     <h4>${t("o.cropTitle")}</h4>
@@ -1148,6 +1169,24 @@ function pickChip(btn, key) {
   if (PREVIEW_TOOLS.includes(currentTool)) schedulePreview();
 }
 
+/* ---- 頁碼顏色:固定色塊 + 自由色盤(#pnColor 為唯一資料來源) ---- */
+function setPnColor(hex, btn) {
+  const inp = document.getElementById("pnColor");
+  if (inp) inp.value = hex;
+  document.querySelectorAll("#optionsBox .sw").forEach(b => b.classList.toggle("on", b === btn));
+  schedulePreview();
+}
+function markPnSwatch(hex) {
+  document.querySelectorAll("#optionsBox .sw").forEach(b => {
+    const bg = b.style.background || "";
+    b.classList.toggle("on", bg.toLowerCase() === hexToRgbCss(hex));
+  });
+}
+function hexToRgbCss(hex) { // "#ff0000" → "rgb(255, 0, 0)"(對齊瀏覽器回傳格式)
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 /* ---- 選項面板事件代理:輸入 → 同步點選狀態 / 即時預覽 ---- */
 const optionsBoxEl = document.getElementById("optionsBox");
 optionsBoxEl.addEventListener("input", () => {
@@ -1488,7 +1527,7 @@ function updatePreview() {
       const fmt = document.getElementById("pnFmt").value;
       const label = fmt === "slash" ? `1 / ${base.numPages}` : fmt === "dash" ? "- 1 -" : "1";
       ctx.font = `${size * scl}px Helvetica, Arial, sans-serif`;
-      ctx.fillStyle = "#403a38";
+      ctx.fillStyle = (document.getElementById("pnColor") || {}).value || "#000000";
       const tw = ctx.measureText(label).width;
       const x = pos === "bc" ? (pv.width - tw) / 2 : pos === "br" ? pv.width - tw - 36 * scl : 36 * scl;
       ctx.fillText(label, x, pv.height - 24 * scl);
@@ -1814,13 +1853,19 @@ async function doPageNum() {
   const size = Math.max(6, Math.min(36, parseInt(document.getElementById("pnSize").value) || 11));
   const pos = document.getElementById("pnPos").value;
   const fmt = document.getElementById("pnFmt").value;
+  const hex = document.getElementById("pnColor").value;
+  const col = rgb(
+    parseInt(hex.slice(1, 3), 16) / 255,
+    parseInt(hex.slice(3, 5), 16) / 255,
+    parseInt(hex.slice(5, 7), 16) / 255
+  );
   const total = doc.getPageCount();
   doc.getPages().forEach((p, i) => {
     const label = fmt === "slash" ? `${i + 1} / ${total}` : fmt === "dash" ? `- ${i + 1} -` : `${i + 1}`;
     const { width } = p.getSize();
     const tw = font.widthOfTextAtSize(label, size);
     const x = pos === "bc" ? (width - tw) / 2 : pos === "br" ? width - tw - 36 : 36;
-    p.drawText(label, { x, y: 24, size, font, color: rgb(0.25, 0.23, 0.22) });
+    p.drawText(label, { x, y: 24, size, font, color: col });
   });
   setProgress(90, t("m.out"));
   const bytes = await doc.save();
