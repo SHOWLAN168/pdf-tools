@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF 工坊 — 免費線上 PDF 工具</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --ink:#1c1917;
+  --ink-soft:#57534e;
+  --paper:#faf7f2;
+  --card:#ffffff;
+  --line:#e7e0d5;
+  --accent:#c2410c;
+  --accent-deep:#9a3412;
+  --accent-soft:#fff1e8;
+  --ok:#166534;
+  --ok-soft:#ecfdf3;
+  --radius:14px;
+  --shadow:0 1px 2px rgba(28,25,23,.05),0 8px 24px -12px rgba(28,25,23,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Noto Sans TC',sans-serif;
+  background:var(--paper);
+  background-image:radial-gradient(circle at 15% 0%, #fdf3e7 0%, transparent 40%),radial-gradient(circle at 100% 100%, #f3ede2 0%, transparent 45%);
+  color:var(--ink);
+  min-height:100vh;
+}
+header{
+  padding:20px 28px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--line);
+  background:rgba(250,247,242,.85);backdrop-filter:blur(8px);
+  position:sticky;top:0;z-index:20;
+}
+.logo{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.35rem;letter-spacing:.02em;cursor:pointer;
+}
+.logo em{font-style:normal;color:var(--accent)}
+.header-note{margin-left:auto;font-size:.78rem;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}
+main{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+
+/* ---------- 首頁 ---------- */
+.hero{text-align:center;margin-bottom:44px}
+.hero h1{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.25}
+.hero h1 span{color:var(--accent)}
+.hero p{margin-top:12px;color:var(--ink-soft);font-size:.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.cat-tabs{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px;
+}
+.cat-tab{
+  font-family:inherit;font-size:.88rem;font-weight:500;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+  border-radius:999px;padding:9px 22px;
+  transition:all .18s ease;box-shadow:0 1px 2px rgba(28,25,23,.04);
+}
+.cat-tab:hover{border-color:#d9c9b4;color:var(--ink)}
+.cat-tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tool-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 20px;cursor:pointer;box-shadow:var(--shadow);
+  transition:transform .18s ease,border-color .18s ease;
+  position:relative;overflow:hidden;
+}
+.tool-card::after{
+  content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent);
+  transform:scaleY(0);transform-origin:bottom;transition:transform .2s ease;
+}
+.tool-card:hover{transform:translateY(-3px);border-color:#d9c9b4}
+.tool-card:hover::after{transform:scaleY(1)}
+.tool-ico{font-size:1.7rem;margin-bottom:10px;display:block}
+.tool-card h3{font-size:1.02rem;font-weight:700;margin-bottom:6px}
+.tool-card p{font-size:.8rem;color:var(--ink-soft);line-height:1.55}
+
+/* ---------- 工具工作區 ---------- */
+.workspace{display:none}
+.back{
+  display:inline-flex;align-items:center;gap:6px;font-size:.85rem;color:var(--ink-soft);
+  cursor:pointer;margin-bottom:20px;border:none;background:none;font-family:inherit;
+}
+.back:hover{color:var(--accent)}
+.ws-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.6rem;margin-bottom:6px}
+.ws-desc{color:var(--ink-soft);font-size:.88rem;margin-bottom:24px}
+.dropzone{
+  border:2px dashed #d6c7ae;border-radius:var(--radius);
+  background:var(--card);
+  padding:56px 24px;text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.dropzone.drag{border-color:var(--accent);background:var(--accent-soft)}
+.dropzone .big{font-size:2.2rem;display:block;margin-bottom:10px}
+.dropzone strong{font-size:1.05rem}
+.dropzone small{display:block;margin-top:8px;color:var(--ink-soft)}
+.filelist{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.file-row{
+  background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:.88rem;
+}
+.file-row .fname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.file-row .fmeta{color:var(--ink-soft);font-size:.78rem;white-space:nowrap}
+.icon-btn{
+  border:1px solid var(--line);background:#fff;border-radius:8px;width:30px;height:30px;
+  cursor:pointer;font-size:.85rem;line-height:1;color:var(--ink-soft);
+}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.options{
+  margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;display:none;box-shadow:var(--shadow);
+}
+.options h4{font-size:.92rem;margin-bottom:14px;font-weight:700}
+.opt-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:12px;font-size:.88rem}
+.opt-row:last-child{margin-bottom:0}
+.opt-row label{color:var(--ink-soft);min-width:88px}
+input[type=text],input[type=number],select{
+  font-family:inherit;font-size:.88rem;padding:8px 12px;border:1px solid var(--line);
+  border-radius:8px;background:#fff;color:var(--ink);min-width:180px;
+}
+input:focus,select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.chip-group{display:flex;gap:8px;flex-wrap:wrap}
+.chip{
+  border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;
+  font-size:.84rem;cursor:pointer;font-family:inherit;color:var(--ink-soft);
+}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* ---------- 頁面排序縮圖 ---------- */
+.page-grid{
+  margin-top:22px;display:none;
+  grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:14px;
+}
+.page-grid.show{display:grid}
+.grid-note{margin-top:18px;font-size:.84rem;color:var(--ink-soft);display:none}
+.grid-note.show{display:block}
+.page-thumb{
+  background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:8px 8px 6px;cursor:grab;position:relative;
+  box-shadow:var(--shadow);user-select:none;
+  transition:transform .15s ease,border-color .15s ease;
+}
+.page-thumb:hover{border-color:#d9c9b4;transform:translateY(-2px)}
+.page-thumb.dragging{opacity:.35;cursor:grabbing;border-color:var(--accent)}
+.page-thumb img{width:100%;display:block;border:1px solid #eee;border-radius:5px;pointer-events:none;background:#fff}
+.page-thumb .pnum{
+  position:absolute;top:-8px;left:-8px;
+  background:var(--ink);color:#fff;font-size:.7rem;font-weight:700;
+  border-radius:999px;padding:3px 9px;box-shadow:var(--shadow);
+}
+.page-thumb .src{display:block;text-align:center;font-size:.7rem;color:var(--ink-soft);margin-top:6px}
+.page-thumb .nudges{
+  position:absolute;bottom:30px;right:6px;display:flex;gap:4px;
+  opacity:0;transition:opacity .15s;
+}
+.page-thumb:hover .nudges{opacity:1}
+.nudge{
+  border:1px solid var(--line);background:#fff;border-radius:6px;
+  width:26px;height:26px;cursor:pointer;font-size:.75rem;line-height:1;color:var(--ink-soft);
+}
+.nudge:hover{border-color:var(--accent);color:var(--accent)}
+.run-bar{margin-top:24px;display:none;text-align:center}
+.btn-primary{
+  font-family:inherit;font-size:1rem;font-weight:700;letter-spacing:.05em;
+  background:var(--accent);color:#fff;border:none;border-radius:999px;
+  padding:15px 52px;cursor:pointer;box-shadow:0 8px 20px -8px rgba(194,65,12,.55);
+  transition:background .2s,transform .15s;
+}
+.btn-primary:hover{background:var(--accent-deep);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.progress{margin-top:18px;display:none}
+.progress .bar{height:8px;border-radius:99px;background:#efe8db;overflow:hidden}
+.progress .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#f59e0b);transition:width .2s}
+.progress .ptext{font-size:.8rem;color:var(--ink-soft);margin-top:8px;text-align:center}
+.result{
+  margin-top:22px;display:none;background:var(--ok-soft);border:1px solid #bbe5c8;
+  border-radius:var(--radius);padding:24px;text-align:center;
+}
+.result h4{color:var(--ok);margin-bottom:6px;font-size:1.05rem}
+.result p{font-size:.84rem;color:var(--ink-soft);margin-bottom:16px}
+.btn-dl{
+  display:inline-block;font-weight:700;background:var(--ok);color:#fff;border:none;
+  border-radius:999px;padding:12px 40px;cursor:pointer;font-family:inherit;font-size:.95rem;
+  text-decoration:none;margin:4px;
+}
+.btn-dl:hover{background:#14532d}
+.btn-again{background:none;border:none;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:.82rem;margin-top:10px}
+.hint{font-size:.78rem;color:var(--ink-soft);margin-top:10px;line-height:1.6}
+footer{text-align:center;padding:30px;font-size:.75rem;color:var(--ink-soft);border-top:1px solid var(--line)}
+@media(max-width:560px){.opt-row label{min-width:100%}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="goHome()">PDF<em>工坊</em></div>
+  <div class="header-note"><span class="dot"></span>檔案完全在您的瀏覽器內處理,不會上傳到任何伺服器</div>
+</header>
+
+<main>
+  <!-- ============ 首頁 ============ -->
+  <section id="home">
+    <div class="hero">
+      <h1>你需要的 <span>PDF 工具</span>,全部在這裡</h1>
+      <p>合併、分割、壓縮、轉換 —— 免安裝、免註冊、免上傳,開啟即用。</p>
+    </div>
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="grid" id="toolGrid"></div>
+  </section>
+
+  <!-- ============ 工作區 ============ -->
+  <section id="workspace" class="workspace">
+    <button class="back" onclick="goHome()">← 返回所有工具</button>
+    <h2 class="ws-title" id="wsTitle"></h2>
+    <p class="ws-desc" id="wsDesc"></p>
+
+    <div class="dropzone" id="dropzone">
+      <span class="big">📄</span>
+      <strong id="dzText">點擊選擇檔案,或將檔案拖曳到這裡</strong>
+      <small id="dzHint"></small>
+      <input type="file" id="fileInput" hidden>
+    </div>
+
+    <div class="filelist" id="fileList"></div>
+    <div class="grid-note" id="gridNote">🖱️ 按住縮圖拖曳即可調整順序,左上角數字為新的頁碼</div>
+    <div class="page-grid" id="pageGrid"></div>
+    <div class="options" id="optionsBox"></div>
+
+    <div class="run-bar" id="runBar">
+      <button class="btn-primary" id="runBtn" onclick="runTool()">開始處理 →</button>
+      <div class="progress" id="progress">
+        <div class="bar"><div class="fill" id="progFill"></div></div>
+        <div class="ptext" id="progText">處理中…</div>
+      </div>
+    </div>
+
+    <div class="result" id="resultBox">
+      <h4>✓ 處理完成!</h4>
+      <p id="resultMeta"></p>
+      <div id="dlButtons"></div>
+      <br><button class="btn-again" onclick="resetTool()">處理其他檔案</button>
+    </div>
+  </section>
+</main>
+
+<footer>所有處理皆於本機瀏覽器完成 · 關閉頁面後不留任何資料</footer>
+
+<script>
+/* ================================================================
+   PDF 工坊 — 純前端 PDF 工具箱
+   引擎:pdf-lib(編輯/組裝) + pdf.js(渲染) + JSZip(打包)
+================================================================ */
+/* pdf.js worker:瀏覽器禁止直接載入跨網域 worker,
+   先以 fetch 取回程式碼轉成同網域 blob URL,即可使用真正的背景執行緒;
+   若環境連 fetch 都被擋(如某些預覽沙箱),則自動退回 fake worker(功能不受影響,僅大檔較慢)。 */
+const PDFJS_WORKER_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL; // 先給預設值,避免競態
+fetch(PDFJS_WORKER_URL)
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(code => {
+    const blobUrl = URL.createObjectURL(new Blob([code], { type: "application/javascript" }));
+    pdfjsLib.GlobalWorkerOptions.workerSrc = blobUrl;
+  })
+  .catch(() => { /* 維持預設,pdf.js 會自行退回 fake worker */ });
+
+const { PDFDocument, degrees, rgb, StandardFonts } = PDFLib;
+
+/* ---------------- 工具定義 ---------------- */
+const CATS = { all:"全部", organize:"整理 PDF", optimize:"優化 PDF", convert:"PDF 轉換", edit:"編輯 PDF" };
+
+const TOOLS = {
+  merge:   { cat:"organize", ico:"🗂️", name:"合併 PDF",   desc:"將多個 PDF 依你排定的順序合併成一份文件。", accept:".pdf", multiple:true,  hint:"可一次選取多個 PDF,並用 ↑↓ 調整順序" },
+  reorder: { cat:"organize", ico:"🔀", name:"頁面排序",   desc:"用滑鼠拖曳頁面縮圖,重新排列同一份 PDF 的頁面順序。", accept:".pdf", multiple:false, hint:"按住縮圖拖曳即可換位;手機或想微調時可用縮圖上的 ◀ ▶ 按鈕" },
+  split:   { cat:"organize", ico:"✂️", name:"分割 PDF",   desc:"依頁碼範圍拆出多份 PDF,或每一頁各存成一個檔案。", accept:".pdf", multiple:false, hint:"支援範圍語法,例如:1-3,5,8-10" },
+  delete:  { cat:"organize", ico:"🗑️", name:"刪除頁面",   desc:"移除 PDF 中不需要的頁面。", accept:".pdf", multiple:false, hint:"支援範圍語法,例如:2,4-6" },
+  extract: { cat:"organize", ico:"📑", name:"擷取頁面",   desc:"只保留你指定的頁面,輸出成新 PDF。", accept:".pdf", multiple:false, hint:"支援範圍語法,例如:1,3-5" },
+  compress:{ cat:"optimize", ico:"🗜️", name:"壓縮 PDF",   desc:"以影像重建方式縮小檔案,適合掃描檔與圖片型 PDF。", accept:".pdf", multiple:false, hint:"注意:壓縮後文字會轉為影像,無法再選取複製" },
+  repair:  { cat:"optimize", ico:"🛠️", name:"修復 PDF",   desc:"重建檔案結構與交叉引用表,嘗試救回無法正常開啟的 PDF。", accept:".pdf", multiple:false, hint:"屬輕度修復:結構性錯誤多半可救回;內容嚴重損毀的檔案仍可能失敗" },
+  pdf2jpg: { cat:"convert",  ico:"🖼️", name:"PDF 轉 JPG", desc:"將 PDF 每一頁輸出成高品質 JPG 圖片。", accept:".pdf", multiple:false, hint:"多頁會自動打包成 ZIP 下載" },
+  img2pdf: { cat:"convert",  ico:"📷", name:"圖片轉 PDF", desc:"將 JPG / PNG 圖片合併輸出成一份 PDF。", accept:".jpg,.jpeg,.png", multiple:true, hint:"每張圖片一頁,依清單順序排列" },
+  rotate:  { cat:"edit",     ico:"🔄", name:"旋轉 PDF",   desc:"將整份或指定頁面旋轉 90 / 180 / 270 度。", accept:".pdf", multiple:false, hint:"" },
+  crop:    { cat:"edit",     ico:"✂", name:"裁剪 PDF",    desc:"由四邊向內裁切頁邊,去除多餘留白或裝訂邊。", accept:".pdf", multiple:false, hint:"以毫米(mm)為單位;若頁面本身帶旋轉屬性,上下左右可能需對調嘗試" },
+  pagenum: { cat:"edit",     ico:"🔢", name:"加入頁碼",   desc:"在每頁下方加上頁碼。", accept:".pdf", multiple:false, hint:"" },
+  watermark:{cat:"edit",     ico:"💧", name:"加浮水印",   desc:"加上中/英文文字或公司 Logo 浮水印,可調透明度、角度與排列方式。", accept:".pdf", multiple:false, hint:"Logo 建議使用去背 PNG 效果最佳;文字浮水印支援中文與任何語言" },
+};
+
+/* ---------------- 各工具選項面板 ---------------- */
+const OPTION_HTML = {
+  split: `
+    <h4>分割方式</h4>
+    <div class="opt-row">
+      <div class="chip-group">
+        <button class="chip on" data-mode="range" onclick="pickChip(this,'splitMode')">依頁碼範圍</button>
+        <button class="chip" data-mode="every" onclick="pickChip(this,'splitMode')">每頁各存一檔</button>
+      </div>
+    </div>
+    <div class="opt-row" id="splitRangeRow">
+      <label>頁碼範圍</label>
+      <input type="text" id="splitRanges" placeholder="例:1-3,5,8-10(每組範圍各輸出一份)">
+    </div>`,
+  compress: `
+    <h4>壓縮強度</h4>
+    <div class="opt-row">
+      <div class="chip-group">
+        <button class="chip" data-mode="low" onclick="pickChip(this,'compressLevel')">輕度(品質優先)</button>
+        <button class="chip on" data-mode="mid" onclick="pickChip(this,'compressLevel')">推薦(平衡)</button>
+        <button class="chip" data-mode="high" onclick="pickChip(this,'compressLevel')">極度(檔案最小)</button>
+      </div>
+    </div>`,
+  pdf2jpg: `
+    <h4>輸出品質</h4>
+    <div class="opt-row">
+      <div class="chip-group">
+        <button class="chip" data-mode="1.5" onclick="pickChip(this,'jpgScale')">一般</button>
+        <button class="chip on" data-mode="2" onclick="pickChip(this,'jpgScale')">高品質</button>
+        <button class="chip" data-mode="3" onclick="pickChip(this,'jpgScale')">超高(檔案較大)</button>
+      </div>
+    </div>`,
+  img2pdf: `
+    <h4>頁面設定</h4>
+    <div class="opt-row">
+      <label>頁面尺寸</label>
+      <select id="imgPageSize">
+        <option value="fit">依圖片原始尺寸</option>
+        <option value="a4p">A4 直向(圖片置中縮放)</option>
+        <option value="a4l">A4 橫向(圖片置中縮放)</option>
+      </select>
+    </div>`,
+  rotate: `
+    <h4>旋轉設定</h4>
+    <div class="opt-row">
+      <label>角度</label>
+      <div class="chip-group">
+        <button class="chip on" data-mode="90"  onclick="pickChip(this,'rotateDeg')">順時針 90°</button>
+        <button class="chip" data-mode="180" onclick="pickChip(this,'rotateDeg')">180°</button>
+        <button class="chip" data-mode="270" onclick="pickChip(this,'rotateDeg')">逆時針 90°</button>
+      </div>
+    </div>
+    <div class="opt-row">
+      <label>套用頁面</label>
+      <input type="text" id="rotatePages" placeholder="留空 = 全部頁面;或輸入如 1,3-5">
+    </div>`,
+  delete: `
+    <h4>刪除設定</h4>
+    <div class="opt-row">
+      <label>要刪除的頁</label>
+      <input type="text" id="deletePages" placeholder="例:2,4-6">
+    </div>`,
+  extract: `
+    <h4>擷取設定</h4>
+    <div class="opt-row">
+      <label>要保留的頁</label>
+      <input type="text" id="extractPages" placeholder="例:1,3-5">
+    </div>`,
+  pagenum: `
+    <h4>頁碼設定</h4>
+    <div class="opt-row">
+      <label>位置</label>
+      <select id="pnPos">
+        <option value="bc">下方置中</option>
+        <option value="br">右下角</option>
+        <option value="bl">左下角</option>
+      </select>
+      <label>格式</label>
+      <select id="pnFmt">
+        <option value="n">1, 2, 3</option>
+        <option value="slash">1 / 10</option>
+        <option value="dash">- 1 -</option>
+      </select>
+      <label>字級</label>
+      <input type="number" id="pnSize" value="11" min="6" max="36" style="min-width:80px">
+    </div>`,
+  crop: `
+    <h4>裁剪設定(由各邊向內裁切,單位:mm)</h4>
+    <div class="opt-row">
+      <label>上邊</label><input type="number" id="cropT" value="10" min="0" style="min-width:90px">
+      <label>下邊</label><input type="number" id="cropB" value="10" min="0" style="min-width:90px">
+    </div>
+    <div class="opt-row">
+      <label>左邊</label><input type="number" id="cropL" value="10" min="0" style="min-width:90px">
+      <label>右邊</label><input type="number" id="cropR" value="10" min="0" style="min-width:90px">
+    </div>
+    <div class="opt-row">
+      <label>套用頁面</label>
+      <input type="text" id="cropPages" placeholder="留空 = 全部頁面;或輸入如 1,3-5">
+    </div>`,
+  watermark: `
+    <h4>浮水印設定</h4>
+    <div class="opt-row">
+      <label>類型</label>
+      <div class="chip-group">
+        <button class="chip on" data-mode="text"  onclick="pickChip(this,'wmType');toggleWmRows()">文字</button>
+        <button class="chip"    data-mode="image" onclick="pickChip(this,'wmType');toggleWmRows()">圖片 / Logo</button>
+      </div>
+    </div>
+    <div class="opt-row" id="wmTextRow">
+      <label>文字</label>
+      <input type="text" id="wmText" value="機密文件" placeholder="支援中英文,例:大鷹旅遊 內部資料">
+      <label>顏色</label>
+      <select id="wmColor" style="min-width:100px">
+        <option value="#6b7280" selected>灰</option>
+        <option value="#b91c1c">紅</option>
+        <option value="#1d4ed8">藍</option>
+        <option value="#166534">綠</option>
+      </select>
+      <label>字級</label>
+      <input type="number" id="wmSize" value="48" min="12" max="200" style="min-width:80px">
+    </div>
+    <div class="opt-row" id="wmImgRow" style="display:none">
+      <label>Logo 圖檔</label>
+      <input type="file" id="wmImgFile" accept=".png,.jpg,.jpeg" style="font-size:.84rem">
+      <label>Logo 寬度</label>
+      <select id="wmScale" style="min-width:120px">
+        <option value="0.2">頁寬 20%</option>
+        <option value="0.3" selected>頁寬 30%</option>
+        <option value="0.45">頁寬 45%</option>
+        <option value="0.6">頁寬 60%</option>
+      </select>
+    </div>
+    <div class="opt-row">
+      <label>透明度</label>
+      <select id="wmOpacity">
+        <option value="0.1">淡</option>
+        <option value="0.2" selected>中</option>
+        <option value="0.4">深</option>
+      </select>
+      <label>角度</label>
+      <select id="wmAngle" style="min-width:110px">
+        <option value="45" selected>斜向 45°</option>
+        <option value="0">水平</option>
+      </select>
+      <label>排列</label>
+      <select id="wmLayout" style="min-width:120px">
+        <option value="center" selected>置中單一</option>
+        <option value="tile">整頁平鋪</option>
+      </select>
+    </div>`,
+};
+
+/* ---------------- 全域狀態 ---------------- */
+let currentTool = null;
+let files = [];          // {file, name, size}
+let chipState = { splitMode:"range", compressLevel:"mid", jpgScale:"2", rotateDeg:"90", wmType:"text" };
+let downloads = [];      // {blob, filename}
+let pageOrder = [];      // 頁面排序:目前順序對應的原始頁索引(0-based)
+let pageThumbs = [];     // 縮圖 dataURL,索引 = 原始頁索引
+
+/* ---------------- 首頁:分類標籤 + 工具卡片 ---------------- */
+let currentCat = "all";
+const grid = document.getElementById("toolGrid");
+const tabBox = document.getElementById("catTabs");
+
+function renderTabs() {
+  tabBox.innerHTML = "";
+  for (const [key, label] of Object.entries(CATS)) {
+    const b = document.createElement("button");
+    b.className = "cat-tab" + (key === currentCat ? " on" : "");
+    b.textContent = label;
+    b.onclick = () => { currentCat = key; renderTabs(); renderToolGrid(); };
+    tabBox.appendChild(b);
+  }
+}
+function renderToolGrid() {
+  grid.innerHTML = "";
+  for (const [key, t] of Object.entries(TOOLS)) {
+    if (currentCat !== "all" && t.cat !== currentCat) continue;
+    const card = document.createElement("div");
+    card.className = "tool-card";
+    card.innerHTML = `<span class="tool-ico">${t.ico}</span><h3>${t.name}</h3><p>${t.desc}</p>`;
+    card.onclick = () => openTool(key);
+    grid.appendChild(card);
+  }
+}
+renderTabs();
+renderToolGrid();
+
+/* ---------------- 導覽 ---------------- */
+function openTool(key) {
+  currentTool = key;
+  const t = TOOLS[key];
+  document.getElementById("home").style.display = "none";
+  document.getElementById("workspace").style.display = "block";
+  document.getElementById("wsTitle").textContent = t.ico + " " + t.name;
+  document.getElementById("wsDesc").textContent = t.desc;
+  document.getElementById("dzHint").textContent =
+    (t.multiple ? "可一次選擇多個檔案 · " : "") + "支援格式:" + t.accept.replaceAll(",", " ");
+  const inp = document.getElementById("fileInput");
+  inp.accept = t.accept;
+  inp.multiple = t.multiple;
+  resetTool();
+}
+function goHome() {
+  document.getElementById("home").style.display = "block";
+  document.getElementById("workspace").style.display = "none";
+  currentTool = null;
+}
+function resetTool() {
+  files = [];
+  downloads = [];
+  pageOrder = [];
+  pageThumbs = [];
+  document.getElementById("pageGrid").innerHTML = "";
+  document.getElementById("pageGrid").classList.remove("show");
+  document.getElementById("gridNote").classList.remove("show");
+  document.getElementById("fileInput").value = "";
+  document.getElementById("resultBox").style.display = "none";
+  document.getElementById("progress").style.display = "none";
+  document.getElementById("runBtn").disabled = false;
+  renderFiles();
+  renderOptions();
+}
+
+/* ---------------- 檔案選取 / 拖放 ---------------- */
+const dz = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
+dz.onclick = () => fileInput.click();
+fileInput.onchange = () => addFiles([...fileInput.files]);
+dz.ondragover = e => { e.preventDefault(); dz.classList.add("drag"); };
+dz.ondragleave = () => dz.classList.remove("drag");
+dz.ondrop = e => {
+  e.preventDefault(); dz.classList.remove("drag");
+  addFiles([...e.dataTransfer.files]);
+};
+
+function addFiles(list) {
+  const t = TOOLS[currentTool];
+  const exts = t.accept.split(",").map(s => s.trim().toLowerCase());
+  const valid = list.filter(f => exts.some(ext => f.name.toLowerCase().endsWith(ext)));
+  if (valid.length < list.length) alert("已略過不支援的檔案格式。");
+  if (!t.multiple) files = valid.slice(0, 1);
+  else files = files.concat(valid);
+  renderFiles();
+  renderOptions();
+  if (currentTool === "reorder" && files.length) buildThumbs();
+}
+
+function renderFiles() {
+  const box = document.getElementById("fileList");
+  box.innerHTML = "";
+  const t = TOOLS[currentTool] || {};
+  files.forEach((f, i) => {
+    const row = document.createElement("div");
+    row.className = "file-row";
+    const up   = t.multiple ? `<button class="icon-btn" title="上移" onclick="moveFile(${i},-1)">↑</button>` : "";
+    const down = t.multiple ? `<button class="icon-btn" title="下移" onclick="moveFile(${i},1)">↓</button>` : "";
+    row.innerHTML = `
+      <span>📄</span>
+      <span class="fname">${escapeHtml(f.name)}</span>
+      <span class="fmeta">${fmtSize(f.size)}</span>
+      ${up}${down}
+      <button class="icon-btn" title="移除" onclick="removeFile(${i})">✕</button>`;
+    box.appendChild(row);
+  });
+  document.getElementById("runBar").style.display = files.length ? "block" : "none";
+}
+function moveFile(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= files.length) return;
+  [files[i], files[j]] = [files[j], files[i]];
+  renderFiles();
+}
+function removeFile(i) { files.splice(i, 1); renderFiles(); renderOptions(); }
+
+function renderOptions() {
+  const box = document.getElementById("optionsBox");
+  const html = OPTION_HTML[currentTool];
+  if (html && files.length) {
+    box.innerHTML = html + (TOOLS[currentTool].hint ? `<div class="hint">ⓘ ${TOOLS[currentTool].hint}</div>` : "");
+    box.style.display = "block";
+    const rr = document.getElementById("splitRangeRow");
+    if (rr) rr.style.display = chipState.splitMode === "range" ? "flex" : "none";
+    if (currentTool === "watermark") toggleWmRows();
+  } else {
+    box.style.display = "none";
+    box.innerHTML = "";
+  }
+}
+function pickChip(btn, key) {
+  chipState[key] = btn.dataset.mode;
+  btn.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
+  btn.classList.add("on");
+  const rr = document.getElementById("splitRangeRow");
+  if (rr) rr.style.display = chipState.splitMode === "range" ? "flex" : "none";
+}
+
+/* ---------------- 共用小工具 ---------------- */
+function fmtSize(b) {
+  if (b > 1048576) return (b / 1048576).toFixed(2) + " MB";
+  if (b > 1024) return (b / 1024).toFixed(1) + " KB";
+  return b + " B";
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function baseName(name){return name.replace(/\.[^.]+$/,"");}
+
+// 解析頁碼範圍 "1-3,5" → [0,1,2,4](0-based,去重、排序)
+function parsePages(str, max) {
+  const out = new Set();
+  if (!str || !str.trim()) return null;
+  for (const part of str.split(",")) {
+    const p = part.trim();
+    if (!p) continue;
+    const m = p.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (m) {
+      let a = +m[1], b = +m[2];
+      if (a > b) [a, b] = [b, a];
+      for (let n = a; n <= b; n++) if (n >= 1 && n <= max) out.add(n - 1);
+    } else if (/^\d+$/.test(p)) {
+      const n = +p;
+      if (n >= 1 && n <= max) out.add(n - 1);
+    } else {
+      throw new Error(`無法解析頁碼:「${p}」,請用如 1-3,5 的格式`);
+    }
+  }
+  if (!out.size) throw new Error("指定的頁碼超出文件範圍");
+  return [...out].sort((a, b) => a - b);
+}
+// 解析為多組範圍 [[0,1,2],[4]](供分割用)
+function parseRangeGroups(str, max) {
+  const groups = [];
+  for (const part of (str || "").split(",")) {
+    const p = part.trim();
+    if (!p) continue;
+    const pages = parsePages(p, max);
+    if (pages) groups.push(pages);
+  }
+  if (!groups.length) throw new Error("請輸入至少一組頁碼範圍");
+  return groups;
+}
+
+function setProgress(pct, text) {
+  document.getElementById("progress").style.display = "block";
+  document.getElementById("progFill").style.width = pct + "%";
+  document.getElementById("progText").textContent = text;
+}
+function readBuf(file) { return file.arrayBuffer(); }
+
+async function loadWithPdfLib(file) {
+  try {
+    return await PDFDocument.load(await readBuf(file), { ignoreEncryption: true });
+  } catch (e) {
+    throw new Error(`「${file.name}」無法讀取,可能已加密或損毀。`);
+  }
+}
+
+function showResult(items, metaText) {
+  downloads = items;
+  const dlBox = document.getElementById("dlButtons");
+  dlBox.innerHTML = "";
+  items.forEach((it, i) => {
+    const a = document.createElement("a");
+    a.className = "btn-dl";
+    a.textContent = items.length > 1 ? `下載 ${it.filename}` : "⬇ 下載檔案";
+    a.href = URL.createObjectURL(it.blob);
+    a.download = it.filename;
+    dlBox.appendChild(a);
+  });
+  document.getElementById("resultMeta").textContent = metaText || "";
+  document.getElementById("resultBox").style.display = "block";
+  document.getElementById("progress").style.display = "none";
+  document.getElementById("resultBox").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ---------------- 主流程 ---------------- */
+async function runTool() {
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true;
+  document.getElementById("resultBox").style.display = "none";
+  try {
+    setProgress(5, "讀取檔案中…");
+    switch (currentTool) {
+      case "merge":     await doMerge(); break;
+      case "reorder":   await doReorder(); break;
+      case "split":     await doSplit(); break;
+      case "compress":  await doCompress(); break;
+      case "pdf2jpg":   await doPdf2Jpg(); break;
+      case "img2pdf":   await doImg2Pdf(); break;
+      case "rotate":    await doRotate(); break;
+      case "crop":      await doCrop(); break;
+      case "repair":    await doRepair(); break;
+      case "delete":    await doDelete(); break;
+      case "extract":   await doExtract(); break;
+      case "pagenum":   await doPageNum(); break;
+      case "watermark": await doWatermark(); break;
+    }
+  } catch (err) {
+    console.error(err);
+    alert("處理失敗:" + (err.message || err));
+    document.getElementById("progress").style.display = "none";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ---------------- 頁面排序:縮圖 + 拖曳 ---------------- */
+async function buildThumbs() {
+  const runBtn = document.getElementById("runBtn");
+  runBtn.disabled = true;
+  const grid = document.getElementById("pageGrid");
+  grid.innerHTML = "";
+  grid.classList.add("show");
+  document.getElementById("gridNote").classList.add("show");
+  try {
+    setProgress(5, "讀取 PDF…");
+    const buf = await readBuf(files[0]);
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    pageThumbs = [];
+    pageOrder = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      setProgress(5 + (i / pdf.numPages) * 90, `產生縮圖(第 ${i}/${pdf.numPages} 頁)…`);
+      const page = await pdf.getPage(i);
+      const vp1 = page.getViewport({ scale: 1 });
+      const vp = page.getViewport({ scale: 260 / vp1.width }); // 縮圖寬約 260px,顯示時再縮
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.floor(vp.width);
+      canvas.height = Math.floor(vp.height);
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      pageThumbs.push(canvas.toDataURL("image/jpeg", 0.8));
+      pageOrder.push(i - 1);
+    }
+    document.getElementById("progress").style.display = "none";
+    renderPageGrid();
+  } catch (e) {
+    console.error(e);
+    alert("無法產生縮圖:" + (e.message || e));
+    document.getElementById("progress").style.display = "none";
+  } finally {
+    runBtn.disabled = false;
+  }
+}
+
+function renderPageGrid() {
+  const grid = document.getElementById("pageGrid");
+  grid.innerHTML = "";
+  pageOrder.forEach((srcIdx, pos) => {
+    const card = document.createElement("div");
+    card.className = "page-thumb";
+    card.draggable = true;
+    card.dataset.src = srcIdx;
+    card.innerHTML = `
+      <span class="pnum">${pos + 1}</span>
+      <img src="${pageThumbs[srcIdx]}" alt="第 ${srcIdx + 1} 頁縮圖">
+      <span class="src">原第 ${srcIdx + 1} 頁</span>
+      <span class="nudges">
+        <button class="nudge" title="往前移" onclick="nudgePage(${pos},-1)">◀</button>
+        <button class="nudge" title="往後移" onclick="nudgePage(${pos},1)">▶</button>
+      </span>`;
+    card.addEventListener("dragstart", e => {
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      try { e.dataTransfer.setData("text/plain", srcIdx); } catch (_) {}
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      syncOrderFromDom();
+    });
+    card.addEventListener("dragenter", () => {
+      const dragging = grid.querySelector(".dragging");
+      if (!dragging || dragging === card) return;
+      const cards = [...grid.children];
+      if (cards.indexOf(dragging) < cards.indexOf(card)) {
+        grid.insertBefore(dragging, card.nextSibling);
+      } else {
+        grid.insertBefore(dragging, card);
+      }
+    });
+    card.addEventListener("dragover", e => e.preventDefault());
+    grid.appendChild(card);
+  });
+}
+
+// 拖曳結束後,依 DOM 目前排列讀回新順序並重畫頁碼
+function syncOrderFromDom() {
+  const grid = document.getElementById("pageGrid");
+  pageOrder = [...grid.children].map(c => parseInt(c.dataset.src));
+  renderPageGrid();
+}
+function nudgePage(pos, dir) {
+  const j = pos + dir;
+  if (j < 0 || j >= pageOrder.length) return;
+  [pageOrder[pos], pageOrder[j]] = [pageOrder[j], pageOrder[pos]];
+  renderPageGrid();
+}
+
+async function doReorder() {
+  if (!pageOrder.length) throw new Error("縮圖尚未載入完成,請稍候");
+  setProgress(20, "依新順序重建 PDF…");
+  const src = await loadWithPdfLib(files[0]);
+  const out = await PDFDocument.create();
+  const pages = await out.copyPages(src, pageOrder);
+  pages.forEach(p => out.addPage(p));
+  setProgress(90, "輸出檔案…");
+  const bytes = await out.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const changed = pageOrder.some((v, i) => v !== i);
+  showResult([{ blob, filename: baseName(files[0].name) + "_重新排序.pdf" }],
+    `共 ${pageOrder.length} 頁${changed ? ",已依新順序輸出" : "(順序未變動)"} · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 1. 合併 ---------------- */
+async function doMerge() {
+  if (files.length < 2) throw new Error("請至少選擇 2 個 PDF 檔案");
+  const out = await PDFDocument.create();
+  for (let i = 0; i < files.length; i++) {
+    setProgress(10 + (i / files.length) * 80, `合併中(${i + 1}/${files.length})…`);
+    const src = await loadWithPdfLib(files[i]);
+    const pages = await out.copyPages(src, src.getPageIndices());
+    pages.forEach(p => out.addPage(p));
+  }
+  setProgress(95, "輸出檔案…");
+  const bytes = await out.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: "合併結果.pdf" }],
+    `已合併 ${files.length} 個檔案,共 ${out.getPageCount()} 頁 · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 2. 分割 ---------------- */
+async function doSplit() {
+  const src = await loadWithPdfLib(files[0]);
+  const total = src.getPageCount();
+  const name = baseName(files[0].name);
+  let groups;
+  if (chipState.splitMode === "every") {
+    groups = Array.from({ length: total }, (_, i) => [i]);
+  } else {
+    groups = parseRangeGroups(document.getElementById("splitRanges").value, total);
+  }
+  const items = [];
+  for (let g = 0; g < groups.length; g++) {
+    setProgress(10 + (g / groups.length) * 80, `分割中(${g + 1}/${groups.length})…`);
+    const doc = await PDFDocument.create();
+    const pages = await doc.copyPages(src, groups[g]);
+    pages.forEach(p => doc.addPage(p));
+    const bytes = await doc.save();
+    const label = groups[g].length === 1
+      ? `第${groups[g][0] + 1}頁`
+      : `第${groups[g][0] + 1}-${groups[g][groups[g].length - 1] + 1}頁`;
+    items.push({ blob: new Blob([bytes], { type: "application/pdf" }), filename: `${name}_${label}.pdf` });
+  }
+  if (items.length === 1) {
+    showResult(items, `原檔 ${total} 頁,已輸出 1 份檔案`);
+  } else {
+    setProgress(95, "打包 ZIP…");
+    const zip = new JSZip();
+    items.forEach(it => zip.file(it.filename, it.blob));
+    const zblob = await zip.generateAsync({ type: "blob" });
+    showResult([{ blob: zblob, filename: `${name}_分割結果.zip` }],
+      `已拆出 ${items.length} 份 PDF,打包為 ZIP · ${fmtSize(zblob.size)}`);
+  }
+}
+
+/* ---------------- 3. 壓縮(影像重建) ---------------- */
+async function doCompress() {
+  const cfg = { low: { scale: 1.6, q: 0.85 }, mid: { scale: 1.4, q: 0.68 }, high: { scale: 1.1, q: 0.5 } }[chipState.compressLevel];
+  const origSize = files[0].size;
+  const buf = await readBuf(files[0]);
+  const pdf = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
+  const out = await PDFDocument.create();
+  for (let i = 1; i <= pdf.numPages; i++) {
+    setProgress(5 + (i / pdf.numPages) * 85, `重新編碼(第 ${i}/${pdf.numPages} 頁)…`);
+    const page = await pdf.getPage(i);
+    const vp = page.getViewport({ scale: cfg.scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.floor(vp.width);
+    canvas.height = Math.floor(vp.height);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const dataUrl = canvas.toDataURL("image/jpeg", cfg.q);
+    const jpg = await out.embedJpg(dataUrl);
+    const orig = page.getViewport({ scale: 1 });
+    const p = out.addPage([orig.width, orig.height]);
+    p.drawImage(jpg, { x: 0, y: 0, width: orig.width, height: orig.height });
+  }
+  setProgress(95, "輸出檔案…");
+  const bytes = await out.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const saved = Math.max(0, Math.round((1 - blob.size / origSize) * 100));
+  showResult([{ blob, filename: baseName(files[0].name) + "_壓縮.pdf" }],
+    `${fmtSize(origSize)} → ${fmtSize(blob.size)}(縮小 ${saved}%)· 內容已轉為影像`);
+}
+
+/* ---------------- 4. PDF → JPG ---------------- */
+async function doPdf2Jpg() {
+  const scale = parseFloat(chipState.jpgScale);
+  const buf = await readBuf(files[0]);
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  const name = baseName(files[0].name);
+  const imgs = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    setProgress(5 + (i / pdf.numPages) * 85, `轉換中(第 ${i}/${pdf.numPages} 頁)…`);
+    const page = await pdf.getPage(i);
+    const vp = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.floor(vp.width);
+    canvas.height = Math.floor(vp.height);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", 0.92));
+    imgs.push({ blob, filename: `${name}_第${i}頁.jpg` });
+  }
+  if (imgs.length === 1) {
+    showResult(imgs, `已輸出 1 張 JPG · ${fmtSize(imgs[0].blob.size)}`);
+  } else {
+    setProgress(95, "打包 ZIP…");
+    const zip = new JSZip();
+    imgs.forEach(it => zip.file(it.filename, it.blob));
+    const zblob = await zip.generateAsync({ type: "blob" });
+    showResult([{ blob: zblob, filename: `${name}_圖片.zip` }],
+      `已輸出 ${imgs.length} 張 JPG,打包為 ZIP · ${fmtSize(zblob.size)}`);
+  }
+}
+
+/* ---------------- 5. 圖片 → PDF ---------------- */
+async function doImg2Pdf() {
+  const mode = document.getElementById("imgPageSize").value;
+  const A4 = [595.28, 841.89];
+  const out = await PDFDocument.create();
+  for (let i = 0; i < files.length; i++) {
+    setProgress(5 + (i / files.length) * 85, `處理圖片(${i + 1}/${files.length})…`);
+    const buf = await readBuf(files[i]);
+    let img;
+    if (/\.png$/i.test(files[i].name)) img = await out.embedPng(buf);
+    else img = await out.embedJpg(buf);
+    let pw, ph;
+    if (mode === "fit") { pw = img.width; ph = img.height; }
+    else if (mode === "a4p") { pw = A4[0]; ph = A4[1]; }
+    else { pw = A4[1]; ph = A4[0]; }
+    const page = out.addPage([pw, ph]);
+    const ratio = Math.min(pw / img.width, ph / img.height, mode === "fit" ? 1 : Infinity);
+    const w = img.width * ratio, h = img.height * ratio;
+    page.drawImage(img, { x: (pw - w) / 2, y: (ph - h) / 2, width: w, height: h });
+  }
+  setProgress(95, "輸出檔案…");
+  const bytes = await out.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: "圖片合併.pdf" }],
+    `已將 ${files.length} 張圖片輸出為 PDF · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 6. 旋轉 ---------------- */
+async function doRotate() {
+  const deg = parseInt(chipState.rotateDeg);
+  const doc = await loadWithPdfLib(files[0]);
+  const total = doc.getPageCount();
+  const sel = parsePages(document.getElementById("rotatePages").value, total); // null = 全部
+  const targets = sel || doc.getPageIndices();
+  targets.forEach(i => {
+    const p = doc.getPage(i);
+    p.setRotation(degrees(((p.getRotation().angle + deg) % 360 + 360) % 360));
+  });
+  setProgress(90, "輸出檔案…");
+  const bytes = await doc.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_旋轉.pdf" }],
+    `已旋轉 ${targets.length} 頁 · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 裁剪 PDF ---------------- */
+const MM = 72 / 25.4; // 1mm = 2.8346pt
+async function doCrop() {
+  const t = (parseFloat(document.getElementById("cropT").value) || 0) * MM;
+  const b = (parseFloat(document.getElementById("cropB").value) || 0) * MM;
+  const l = (parseFloat(document.getElementById("cropL").value) || 0) * MM;
+  const r = (parseFloat(document.getElementById("cropR").value) || 0) * MM;
+  if (t + b + l + r === 0) throw new Error("請至少在一邊輸入裁切量");
+  const doc = await loadWithPdfLib(files[0]);
+  const total = doc.getPageCount();
+  const sel = parsePages(document.getElementById("cropPages").value, total);
+  const targets = sel || doc.getPageIndices();
+  for (const i of targets) {
+    const p = doc.getPage(i);
+    const mb = p.getMediaBox();
+    const w = mb.width - l - r;
+    const h = mb.height - t - b;
+    if (w <= 20 || h <= 20)
+      throw new Error(`第 ${i + 1} 頁裁切量過大,剩餘尺寸不足(頁面約 ${Math.round(mb.width/MM)}×${Math.round(mb.height/MM)} mm)`);
+    p.setCropBox(mb.x + l, mb.y + b, w, h);
+  }
+  setProgress(90, "輸出檔案…");
+  const bytes = await doc.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_裁剪.pdf" }],
+    `已裁剪 ${targets.length} 頁 · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 修復 PDF(輕度:重建結構) ---------------- */
+async function doRepair() {
+  setProgress(30, "解析並重建檔案結構…");
+  let doc;
+  try {
+    doc = await PDFDocument.load(await readBuf(files[0]), {
+      ignoreEncryption: true,
+      throwOnInvalidObject: false,
+    });
+  } catch (e) {
+    throw new Error("此檔案損毀程度超出瀏覽器端修復能力,建議改用桌面版工具(如 Ghostscript / qpdf)處理。");
+  }
+  setProgress(80, "輸出修復後檔案…");
+  const bytes = await doc.save({ useObjectStreams: false });
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_修復.pdf" }],
+    `已重建交叉引用表與物件結構,共 ${doc.getPageCount()} 頁 · ${fmtSize(blob.size)}。請開啟確認內容是否完整。`);
+}
+
+/* ---------------- 7. 刪除頁面 ---------------- */
+async function doDelete() {
+  const doc = await loadWithPdfLib(files[0]);
+  const total = doc.getPageCount();
+  const del = parsePages(document.getElementById("deletePages").value, total);
+  if (!del) throw new Error("請輸入要刪除的頁碼");
+  if (del.length >= total) throw new Error("不能刪除全部頁面");
+  const keep = doc.getPageIndices().filter(i => !del.includes(i));
+  const out = await PDFDocument.create();
+  const pages = await out.copyPages(doc, keep);
+  pages.forEach(p => out.addPage(p));
+  setProgress(90, "輸出檔案…");
+  const bytes = await out.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_已刪頁.pdf" }],
+    `已刪除 ${del.length} 頁,剩 ${keep.length} 頁 · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 8. 擷取頁面 ---------------- */
+async function doExtract() {
+  const doc = await loadWithPdfLib(files[0]);
+  const total = doc.getPageCount();
+  const sel = parsePages(document.getElementById("extractPages").value, total);
+  if (!sel) throw new Error("請輸入要保留的頁碼");
+  const out = await PDFDocument.create();
+  const pages = await out.copyPages(doc, sel);
+  pages.forEach(p => out.addPage(p));
+  setProgress(90, "輸出檔案…");
+  const bytes = await out.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_擷取.pdf" }],
+    `已擷取 ${sel.length} 頁 · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 9. 頁碼 ---------------- */
+async function doPageNum() {
+  const doc = await loadWithPdfLib(files[0]);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const size = Math.max(6, Math.min(36, parseInt(document.getElementById("pnSize").value) || 11));
+  const pos = document.getElementById("pnPos").value;
+  const fmt = document.getElementById("pnFmt").value;
+  const total = doc.getPageCount();
+  doc.getPages().forEach((p, i) => {
+    const label = fmt === "slash" ? `${i + 1} / ${total}` : fmt === "dash" ? `- ${i + 1} -` : `${i + 1}`;
+    const { width } = p.getSize();
+    const tw = font.widthOfTextAtSize(label, size);
+    const x = pos === "bc" ? (width - tw) / 2 : pos === "br" ? width - tw - 36 : 36;
+    p.drawText(label, { x, y: 24, size, font, color: rgb(0.25, 0.23, 0.22) });
+  });
+  setProgress(90, "輸出檔案…");
+  const bytes = await doc.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_頁碼.pdf" }],
+    `已為 ${total} 頁加上頁碼 · ${fmtSize(blob.size)}`);
+}
+
+/* ---------------- 10. 浮水印(文字任何語言 / Logo 圖片) ---------------- */
+function toggleWmRows() {
+  const tr = document.getElementById("wmTextRow");
+  const ir = document.getElementById("wmImgRow");
+  if (!tr || !ir) return;
+  const isText = (chipState.wmType || "text") === "text";
+  tr.style.display = isText ? "flex" : "none";
+  ir.style.display = isText ? "none" : "flex";
+}
+
+// 用 Canvas 以瀏覽器內建字型渲染文字 → 高解析 PNG(支援中文,免下載字型檔)
+function textToPng(text, sizePt, colorCss) {
+  const k = 3; // 3 倍解析度,列印也清晰
+  const canvas = document.createElement("canvas");
+  let ctx = canvas.getContext("2d");
+  const fontCss = `700 ${sizePt * k}px "Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif`;
+  ctx.font = fontCss;
+  const m = ctx.measureText(text);
+  const pad = sizePt * k * 0.15;
+  canvas.width = Math.ceil(m.width + pad * 2);
+  canvas.height = Math.ceil(sizePt * k * 1.4);
+  ctx = canvas.getContext("2d"); // 調整尺寸後狀態重設,需重新取得並設定
+  ctx.font = fontCss;
+  ctx.fillStyle = colorCss;
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, pad, canvas.height / 2);
+  return { dataUrl: canvas.toDataURL("image/png"), wPt: canvas.width / k, hPt: canvas.height / k };
+}
+
+// 以「浮水印中心點」為基準繪製(pdf-lib 的 rotate 以左下角為軸,需換算)
+function drawWmOnPage(page, img, w, h, angleDeg, opacity, layout) {
+  const { width, height } = page.getSize();
+  const th = (angleDeg * Math.PI) / 180;
+  const place = (cx, cy) => {
+    const x = cx - (w / 2) * Math.cos(th) + (h / 2) * Math.sin(th);
+    const y = cy - (w / 2) * Math.sin(th) - (h / 2) * Math.cos(th);
+    page.drawImage(img, { x, y, width: w, height: h, opacity, rotate: degrees(angleDeg) });
+  };
+  if (layout === "tile") {
+    // 旋轉後的外框尺寸,決定平鋪間距
+    const bw = Math.abs(w * Math.cos(th)) + Math.abs(h * Math.sin(th));
+    const bh = Math.abs(w * Math.sin(th)) + Math.abs(h * Math.cos(th));
+    const sx = bw * 1.3, sy = bh * 1.3;
+    for (let cy = sy / 2; cy < height + sy / 2; cy += sy)
+      for (let cx = sx / 2; cx < width + sx / 2; cx += sx)
+        place(cx, cy);
+  } else {
+    place(width / 2, height / 2);
+  }
+}
+
+async function doWatermark() {
+  const type = chipState.wmType || "text";
+  const opacity = parseFloat(document.getElementById("wmOpacity").value);
+  const angle = parseInt(document.getElementById("wmAngle").value);
+  const layout = document.getElementById("wmLayout").value;
+  const doc = await loadWithPdfLib(files[0]);
+
+  let img, natW = null, natH = null, pctMode = false, pct = 0.3;
+  if (type === "text") {
+    const text = (document.getElementById("wmText").value || "").trim();
+    if (!text) throw new Error("請輸入浮水印文字");
+    const size = Math.max(12, Math.min(200, parseInt(document.getElementById("wmSize").value) || 48));
+    const color = document.getElementById("wmColor").value;
+    setProgress(20, "渲染浮水印文字…");
+    const r = textToPng(text, size, color);
+    img = await doc.embedPng(r.dataUrl);
+    natW = r.wPt; natH = r.hPt;
+  } else {
+    const f = document.getElementById("wmImgFile").files[0];
+    if (!f) throw new Error("請先選擇 Logo 圖檔(PNG 或 JPG)");
+    setProgress(20, "讀取 Logo…");
+    const buf = await f.arrayBuffer();
+    const u8 = new Uint8Array(buf);
+    if (u8[0] === 0x89 && u8[1] === 0x50) img = await doc.embedPng(buf);
+    else if (u8[0] === 0xFF && u8[1] === 0xD8) img = await doc.embedJpg(buf);
+    else throw new Error("Logo 僅支援 PNG 或 JPG 格式");
+    pctMode = true;
+    pct = parseFloat(document.getElementById("wmScale").value);
+  }
+
+  setProgress(50, "套用到每一頁…");
+  doc.getPages().forEach(p => {
+    const { width, height } = p.getSize();
+    let w, h;
+    if (pctMode) {
+      w = width * pct;
+      h = (w * img.height) / img.width;
+    } else {
+      w = natW; h = natH;
+      const maxW = Math.hypot(width, height) * 0.65; // 避免長字串超出頁面
+      if (w > maxW) { h *= maxW / w; w = maxW; }
+    }
+    drawWmOnPage(p, img, w, h, angle, opacity, layout);
+  });
+
+  setProgress(90, "輸出檔案…");
+  const bytes = await doc.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_浮水印.pdf" }],
+    `已為 ${doc.getPageCount()} 頁加上${type === "text" ? "文字" : "Logo"}浮水印 · ${fmtSize(blob.size)}`);
+}
+</script>
+</body>
+</html>
