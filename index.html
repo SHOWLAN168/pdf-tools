@@ -104,7 +104,7 @@ main{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
 .opt-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:12px;font-size:.88rem}
 .opt-row:last-child{margin-bottom:0}
 .opt-row label{color:var(--ink-soft);min-width:88px}
-input[type=text],input[type=number],select{
+input[type=text],input[type=number],input[type=password],select{
   font-family:inherit;font-size:.88rem;padding:8px 12px;border:1px solid var(--line);
   border-radius:8px;background:#fff;color:var(--ink);min-width:180px;
 }
@@ -254,6 +254,7 @@ footer{text-align:center;padding:30px;font-size:.75rem;color:var(--ink-soft);bor
       <h4 id="resTitle"></h4>
       <p id="resultMeta"></p>
       <div id="dlButtons"></div>
+      <p id="resultRemind" style="display:none;margin-top:14px;font-size:.82rem;color:var(--accent-deep);background:var(--accent-soft);border:1px solid #f5d9c6;border-radius:10px;padding:10px 14px"></p>
       <br><button class="btn-again" id="btnAgain" onclick="resetTool()"></button>
     </div>
   </section>
@@ -362,7 +363,25 @@ const I18N = {
 "e.logo":"請先選擇 Logo 圖檔(PNG 或 JPG)","e.logoFmt":"Logo 僅支援 PNG 或 JPG 格式",
 "e.thumb":"無法產生縮圖:","e.thumbWait":"縮圖尚未載入完成,請稍候",
 "f.merge":"合併結果","f.splitZip":"分割結果","f.page":"第{n}頁","f.pages":"第{a}-{b}頁","f.jpgPage":"第{n}頁","f.imgZip":"圖片","f.imgPdf":"圖片合併",
-"f.comp":"壓縮","f.rot":"旋轉","f.crop":"裁剪","f.rep":"修復","f.del":"已刪頁","f.ext":"擷取","f.pn":"頁碼","f.wm":"浮水印","f.ro":"重新排序"
+"f.comp":"壓縮","f.rot":"旋轉","f.crop":"裁剪","f.rep":"修復","f.del":"已刪頁","f.ext":"擷取","f.pn":"頁碼","f.wm":"浮水印","f.ro":"重新排序",
+"cat.secure":"PDF 安全",
+"protect.n":"鎖定 PDF","protect.d":"以 AES-256 為 PDF 加上開啟密碼,或設定禁止列印/複製的權限保護。","protect.h":"請牢記密碼:AES-256 加密無法還原,一旦忘記將永久無法開啟此檔案",
+"o.lockKeep":"⚠️ 重要:本工具只會輸出一份「加密副本」,你的原始檔不會被更動。請務必自行保留未加密的原始檔——萬一忘記密碼,還能用原檔重新製作。",
+"r.lockRemind":"別忘了:妥善保存密碼,並留好未加密的原始檔備份",
+"unlock.n":"移除限制","unlock.d":"解開被鎖住修改/列印/複製的 PDF,讓檔案可以自由編輯。","unlock.h":"適用能直接開啟、但不能編輯的權限保護檔(例如供應商鎖住的行程表);僅限處理您有權限的檔案",
+"r.unlockPerm":"已移除修改/列印/複製限制,檔案現在可自由編輯",
+"e.needOpenPwd":"這個檔案連開啟都需要密碼,無法在此解除。請向檔案提供者取得密碼,用 PDF 閱讀器開啟後另存新檔",
+"o.lockTitle":"加密方式","o.lockOpen":"開啟密碼","o.lockRestrict":"權限保護",
+"o.lockOpenHint":"任何人開啟此 PDF 都必須輸入密碼(AES-256 加密)",
+"o.lockRestrictHint":"不需密碼即可開啟閱讀,但禁止列印、複製與修改;解除限制需輸入此密碼",
+"o.pwd":"密碼","o.pwdPh":"請輸入密碼","o.pwd2":"確認密碼","o.pwd2Ph":"再輸入一次",
+"o.unlockPh":"輸入此 PDF 的密碼",
+"m.qpdfLoad":"載入加密引擎…","m.encrypting":"加密中…","m.decrypting":"解密中…",
+"e.qpdfLoad":"加密引擎載入失敗;請確認網路連線,或改在正式部署的網址使用此功能",
+"e.qpdfFail":"加密引擎處理失敗:","e.notLocked":"這個 PDF 沒有任何密碼或限制,無需解鎖",
+"e.pwdNeed":"請輸入密碼","e.pwdMismatch":"兩次輸入的密碼不一致","e.pwdWrong":"密碼錯誤,請重新輸入",
+"f.lock":"已鎖定","f.unlock":"已解鎖",
+"r.lockO":"已加上開啟密碼(AES-256)","r.lockR":"已套用權限保護:可開啟,禁止列印/複製/修改","r.unlock":"已移除密碼與權限限制"
 },
 "zh-CN": {
 "brand":"PDF<em>工坊</em>",
@@ -430,7 +449,25 @@ const I18N = {
 "e.logo":"请先选择 Logo 图档(PNG 或 JPG)","e.logoFmt":"Logo 仅支持 PNG 或 JPG 格式",
 "e.thumb":"无法生成缩略图:","e.thumbWait":"缩略图尚未加载完成,请稍候",
 "f.merge":"合并结果","f.splitZip":"拆分结果","f.page":"第{n}页","f.pages":"第{a}-{b}页","f.jpgPage":"第{n}页","f.imgZip":"图片","f.imgPdf":"图片合并",
-"f.comp":"压缩","f.rot":"旋转","f.crop":"裁剪","f.rep":"修复","f.del":"已删页","f.ext":"提取","f.pn":"页码","f.wm":"水印","f.ro":"重新排序"
+"f.comp":"压缩","f.rot":"旋转","f.crop":"裁剪","f.rep":"修复","f.del":"已删页","f.ext":"提取","f.pn":"页码","f.wm":"水印","f.ro":"重新排序",
+"cat.secure":"PDF 安全",
+"protect.n":"锁定 PDF","protect.d":"以 AES-256 为 PDF 加上打开密码,或设置禁止打印/复制的权限保护。","protect.h":"请牢记密码:AES-256 加密无法还原,一旦忘记将永久无法打开此文件",
+"o.lockKeep":"⚠️ 重要:本工具只会输出一份「加密副本」,你的原始文件不会被更动。请务必自行保留未加密的原始文件——万一忘记密码,还能用原档重新制作。",
+"r.lockRemind":"别忘了:妥善保存密码,并留好未加密的原始文件备份",
+"unlock.n":"移除限制","unlock.d":"解开被锁住修改/打印/复制的 PDF,让文件可以自由编辑。","unlock.h":"适用能直接打开、但不能编辑的权限保护文件(例如供应商锁住的行程表);仅限处理您有权限的文件",
+"r.unlockPerm":"已移除修改/打印/复制限制,文件现在可自由编辑",
+"e.needOpenPwd":"这个文件连打开都需要密码,无法在此解除。请向文件提供者取得密码,用 PDF 阅读器打开后另存新档",
+"o.lockTitle":"加密方式","o.lockOpen":"打开密码","o.lockRestrict":"权限保护",
+"o.lockOpenHint":"任何人打开此 PDF 都必须输入密码(AES-256 加密)",
+"o.lockRestrictHint":"不需密码即可打开阅读,但禁止打印、复制与修改;解除限制需输入此密码",
+"o.pwd":"密码","o.pwdPh":"请输入密码","o.pwd2":"确认密码","o.pwd2Ph":"再输入一次",
+"o.unlockPh":"输入此 PDF 的密码",
+"m.qpdfLoad":"加载加密引擎…","m.encrypting":"加密中…","m.decrypting":"解密中…",
+"e.qpdfLoad":"加密引擎加载失败;请确认网络连接,或改在正式部署的网址使用此功能",
+"e.qpdfFail":"加密引擎处理失败:","e.notLocked":"这个 PDF 没有任何密码或限制,无需解锁",
+"e.pwdNeed":"请输入密码","e.pwdMismatch":"两次输入的密码不一致","e.pwdWrong":"密码错误,请重新输入",
+"f.lock":"已锁定","f.unlock":"已解锁",
+"r.lockO":"已加上打开密码(AES-256)","r.lockR":"已应用权限保护:可打开,禁止打印/复制/修改","r.unlock":"已移除密码与权限限制"
 },
 "en": {
 "brand":"PDF<em>Workshop</em>",
@@ -498,7 +535,25 @@ const I18N = {
 "e.logo":"Choose a logo file first (PNG or JPG)","e.logoFmt":"Logo must be PNG or JPG",
 "e.thumb":"Could not render thumbnails: ","e.thumbWait":"Thumbnails are still loading, please wait",
 "f.merge":"merged","f.splitZip":"split","f.page":"page{n}","f.pages":"pages{a}-{b}","f.jpgPage":"page{n}","f.imgZip":"images","f.imgPdf":"images",
-"f.comp":"compressed","f.rot":"rotated","f.crop":"cropped","f.rep":"repaired","f.del":"pages-removed","f.ext":"extracted","f.pn":"numbered","f.wm":"watermark","f.ro":"reordered"
+"f.comp":"compressed","f.rot":"rotated","f.crop":"cropped","f.rep":"repaired","f.del":"pages-removed","f.ext":"extracted","f.pn":"numbered","f.wm":"watermark","f.ro":"reordered",
+"cat.secure":"Security",
+"protect.n":"Protect PDF","protect.d":"Add an AES-256 open password, or restrict printing and copying with an owner password.","protect.h":"Remember your password: AES-256 encryption can’t be reversed — if you forget it, the file is locked for good",
+"o.lockKeep":"⚠️ Important: this tool outputs an encrypted COPY — your original file is left untouched. Be sure to keep the unencrypted original, so you can recreate the file if the password is ever lost.",
+"r.lockRemind":"Don’t forget: save the password, and keep a backup of the unencrypted original",
+"unlock.n":"Remove restrictions","unlock.d":"Unlock a PDF that is protected against editing, printing or copying so you can edit it freely.","unlock.h":"For permission-protected files that open directly but can\u2019t be edited (e.g. an itinerary locked by a supplier); only for files you are authorized to process",
+"r.unlockPerm":"Editing / printing / copying restrictions removed \u2014 the file is now fully editable",
+"e.needOpenPwd":"This file needs a password even to open, which can\u2019t be removed here. Ask the file\u2019s provider for the password, open it in a PDF reader and save a copy",
+"o.lockTitle":"Protection mode","o.lockOpen":"Open password","o.lockRestrict":"Restrict permissions",
+"o.lockOpenHint":"Anyone opening this PDF must enter the password (AES-256)",
+"o.lockRestrictHint":"Opens without a password, but printing, copying and editing are blocked; this password removes the restrictions",
+"o.pwd":"Password","o.pwdPh":"Enter password","o.pwd2":"Confirm","o.pwd2Ph":"Enter again",
+"o.unlockPh":"Password of this PDF",
+"m.qpdfLoad":"Loading encryption engine…","m.encrypting":"Encrypting…","m.decrypting":"Decrypting…",
+"e.qpdfLoad":"Could not load the encryption engine; check your connection or use the deployed site",
+"e.qpdfFail":"Encryption engine failed: ","e.notLocked":"This PDF has no password or restrictions \u2014 nothing to unlock",
+"e.pwdNeed":"Enter a password","e.pwdMismatch":"Passwords do not match","e.pwdWrong":"Wrong password, please try again",
+"f.lock":"locked","f.unlock":"unlocked",
+"r.lockO":"Open password added (AES-256)","r.lockR":"Permissions restricted: opens freely, printing/copying/editing blocked","r.unlock":"Password and restrictions removed"
 },
 "ja": {
 "brand":"PDF<em>工房</em>",
@@ -566,7 +621,25 @@ const I18N = {
 "e.logo":"ロゴ画像(PNG/JPG)を選択してください","e.logoFmt":"ロゴはPNGまたはJPGのみ対応",
 "e.thumb":"サムネイル生成失敗:","e.thumbWait":"サムネイル読み込み中です。お待ちください",
 "f.merge":"結合結果","f.splitZip":"分割","f.page":"{n}ページ目","f.pages":"{a}-{b}ページ","f.jpgPage":"{n}ページ目","f.imgZip":"画像","f.imgPdf":"画像結合",
-"f.comp":"圧縮","f.rot":"回転","f.crop":"トリミング","f.rep":"修復","f.del":"ページ削除","f.ext":"抽出","f.pn":"番号付き","f.wm":"透かし","f.ro":"並替済"
+"f.comp":"圧縮","f.rot":"回転","f.crop":"トリミング","f.rep":"修復","f.del":"ページ削除","f.ext":"抽出","f.pn":"番号付き","f.wm":"透かし","f.ro":"並替済",
+"cat.secure":"セキュリティ",
+"protect.n":"PDFをロック","protect.d":"AES-256で開封パスワードを設定、または印刷・コピーを禁止する権限保護を追加します。","protect.h":"パスワードは必ず控えてください:AES-256暗号は復元できず、忘れるとファイルを永久に開けなくなります",
+"o.lockKeep":"⚠️ 重要:このツールは「暗号化されたコピー」を出力し、元のファイルは変更されません。パスワードを忘れても作り直せるよう、暗号化前の元ファイルを必ず保管してください。",
+"r.lockRemind":"お忘れなく:パスワードを保存し、暗号化前の元ファイルのバックアップも残してください",
+"unlock.n":"制限を解除","unlock.d":"編集・印刷・コピーがロックされたPDFを解除し、自由に編集できるようにします。","unlock.h":"そのまま開けるが編集できない権限保護ファイル(例:仕入先がロックした行程表)向け。権限のあるファイルのみ処理してください",
+"r.unlockPerm":"編集・印刷・コピーの制限を解除しました。自由に編集できます",
+"e.needOpenPwd":"このファイルは開くだけでもパスワードが必要で、ここでは解除できません。提供者からパスワードを入手し、PDFビューアで開いて別名保存してください",
+"o.lockTitle":"保護方式","o.lockOpen":"開封パスワード","o.lockRestrict":"権限制限",
+"o.lockOpenHint":"開くには必ずパスワードが必要になります(AES-256)",
+"o.lockRestrictHint":"パスワードなしで閲覧できますが、印刷・コピー・編集は禁止。解除にはこのパスワードが必要です",
+"o.pwd":"パスワード","o.pwdPh":"パスワードを入力","o.pwd2":"確認","o.pwd2Ph":"もう一度入力",
+"o.unlockPh":"このPDFのパスワード",
+"m.qpdfLoad":"暗号化エンジン読み込み中…","m.encrypting":"暗号化中…","m.decrypting":"復号中…",
+"e.qpdfLoad":"暗号化エンジンを読み込めません。接続を確認するか、本番サイトでご利用ください",
+"e.qpdfFail":"暗号化エンジンエラー:","e.notLocked":"このPDFにはパスワードや制限がなく、解除の必要はありません",
+"e.pwdNeed":"パスワードを入力してください","e.pwdMismatch":"パスワードが一致しません","e.pwdWrong":"パスワードが違います",
+"f.lock":"ロック済","f.unlock":"解除済",
+"r.lockO":"開封パスワードを設定しました(AES-256)","r.lockR":"権限制限を適用:閲覧可、印刷/コピー/編集は禁止","r.unlock":"パスワードと制限を解除しました"
 },
 "ko": {
 "brand":"PDF<em>워크숍</em>",
@@ -634,7 +707,25 @@ const I18N = {
 "e.logo":"로고 파일(PNG/JPG)을 먼저 선택하세요","e.logoFmt":"로고는 PNG 또는 JPG만 지원",
 "e.thumb":"썸네일 생성 실패: ","e.thumbWait":"썸네일 로딩 중입니다. 잠시 기다려 주세요",
 "f.merge":"병합결과","f.splitZip":"분할","f.page":"{n}페이지","f.pages":"{a}-{b}페이지","f.jpgPage":"{n}페이지","f.imgZip":"이미지","f.imgPdf":"이미지병합",
-"f.comp":"압축","f.rot":"회전","f.crop":"자르기","f.rep":"복구","f.del":"페이지삭제","f.ext":"추출","f.pn":"번호","f.wm":"워터마크","f.ro":"순서변경"
+"f.comp":"압축","f.rot":"회전","f.crop":"자르기","f.rep":"복구","f.del":"페이지삭제","f.ext":"추출","f.pn":"번호","f.wm":"워터마크","f.ro":"순서변경",
+"cat.secure":"보안",
+"protect.n":"PDF 잠금","protect.d":"AES-256 열기 암호를 설정하거나 인쇄·복사를 금지하는 권한 보호를 추가합니다.","protect.h":"암호를 꼭 기억하세요: AES-256 암호화는 복구할 수 없어, 잊으면 파일을 영원히 열 수 없습니다",
+"o.lockKeep":"⚠️ 중요: 이 도구는 「암호화된 사본」을 출력하며 원본 파일은 그대로 유지됩니다. 암호를 잊어도 다시 만들 수 있도록 암호화 전 원본을 꼭 보관하세요.",
+"r.lockRemind":"잊지 마세요: 암호를 저장하고, 암호화 전 원본 백업도 남겨두세요",
+"unlock.n":"제한 해제","unlock.d":"편집/인쇄/복사가 잠긴 PDF를 해제해 자유롭게 편집할 수 있게 합니다.","unlock.h":"바로 열리지만 편집이 안 되는 권한 보호 파일(예: 공급업체가 잠근 일정표)용. 권한이 있는 파일만 처리하세요",
+"r.unlockPerm":"편집/인쇄/복사 제한을 제거했습니다. 이제 자유롭게 편집할 수 있습니다",
+"e.needOpenPwd":"이 파일은 열기에도 암호가 필요해 여기서는 해제할 수 없습니다. 제공자에게 암호를 받아 PDF 뷰어에서 연 뒤 사본으로 저장하세요",
+"o.lockTitle":"보호 방식","o.lockOpen":"열기 암호","o.lockRestrict":"권한 제한",
+"o.lockOpenHint":"이 PDF를 열려면 반드시 암호를 입력해야 합니다(AES-256)",
+"o.lockRestrictHint":"암호 없이 열람 가능하지만 인쇄·복사·편집이 금지됩니다. 해제하려면 이 암호가 필요합니다",
+"o.pwd":"암호","o.pwdPh":"암호 입력","o.pwd2":"확인","o.pwd2Ph":"다시 입력",
+"o.unlockPh":"이 PDF의 암호",
+"m.qpdfLoad":"암호화 엔진 로드 중…","m.encrypting":"암호화 중…","m.decrypting":"복호화 중…",
+"e.qpdfLoad":"암호화 엔진을 불러올 수 없습니다. 연결을 확인하거나 배포된 사이트에서 사용하세요",
+"e.qpdfFail":"암호화 엔진 오류: ","e.notLocked":"이 PDF에는 암호나 제한이 없어 해제할 필요가 없습니다",
+"e.pwdNeed":"암호를 입력하세요","e.pwdMismatch":"암호가 일치하지 않습니다","e.pwdWrong":"암호가 올바르지 않습니다",
+"f.lock":"잠금","f.unlock":"잠금해제",
+"r.lockO":"열기 암호를 설정했습니다(AES-256)","r.lockR":"권한 제한 적용: 열람 가능, 인쇄/복사/편집 금지","r.unlock":"암호와 제한을 제거했습니다"
 }
 };
 
@@ -705,8 +796,10 @@ const TOOLS = {
   crop:    { cat:"edit",     ico:"✂", accept:".pdf", multiple:false },
   pagenum: { cat:"edit",     ico:"🔢", accept:".pdf", multiple:false },
   watermark:{cat:"edit",     ico:"💧", accept:".pdf", multiple:false },
+  protect: { cat:"secure",   ico:"🔒", accept:".pdf", multiple:false },
+  unlock:  { cat:"secure",   ico:"🔑", accept:".pdf", multiple:false },
 };
-const CAT_KEYS = ["all","organize","optimize","convert","edit"];
+const CAT_KEYS = ["all","organize","optimize","convert","edit","secure"];
 
 /* ---------------- 各工具選項面板(依當前語言即時產生) ---------------- */
 const OPTION_BUILDERS = {
@@ -865,13 +958,27 @@ const OPTION_BUILDERS = {
         <option value="tile">${t("o.tile")}</option>
       </select>
     </div>`,
+  protect: () => `
+    <div class="hint" style="background:var(--accent-soft);border:1px solid #f5d9c6;color:var(--accent-deep);padding:10px 14px;border-radius:10px;margin-bottom:16px;margin-top:0">${t("o.lockKeep")}</div>
+    <h4>${t("o.lockTitle")}</h4>
+    <div class="opt-row"><div class="chip-group">
+      <button class="chip ${chipState.lockMode==="open"?"on":""}" data-mode="open" onclick="pickChip(this,'lockMode');toggleLockHint()">${t("o.lockOpen")}</button>
+      <button class="chip ${chipState.lockMode==="restrict"?"on":""}" data-mode="restrict" onclick="pickChip(this,'lockMode');toggleLockHint()">${t("o.lockRestrict")}</button>
+    </div></div>
+    <div class="opt-row">
+      <label>${t("o.pwd")}</label>
+      <input type="password" id="lockPwd" placeholder="${t("o.pwdPh")}" autocomplete="new-password">
+      <label>${t("o.pwd2")}</label>
+      <input type="password" id="lockPwd2" placeholder="${t("o.pwd2Ph")}" autocomplete="new-password">
+    </div>
+    <div class="hint" id="lockModeHint"></div>`,
 };
 
 /* ---------------- 全域狀態 ---------------- */
 let currentTool = null;
 let currentCat = "all";
 let files = [];
-let chipState = { splitMode:"range", compressLevel:"mid", jpgScale:"2", rotateDeg:"90", wmType:"text" };
+let chipState = { splitMode:"range", compressLevel:"mid", jpgScale:"2", rotateDeg:"90", wmType:"text", lockMode:"open" };
 let downloads = [];
 let pageOrder = [];
 let pageThumbs = [];
@@ -1153,6 +1260,7 @@ function renderOptions() {
     const rr = document.getElementById("splitRangeRow");
     if (rr) rr.style.display = chipState.splitMode === "range" ? "flex" : "none";
     if (currentTool === "watermark") toggleWmRows();
+    if (currentTool === "protect") toggleLockHint();
     if (SELECT_TOOLS.includes(currentTool) && pageThumbs.length) syncSelToInput();
     if (PREVIEW_TOOLS.includes(currentTool)) schedulePreview();
   } else {
@@ -1262,8 +1370,39 @@ async function loadWithPdfLib(file) {
     throw new Error(t("e.load", { name: file.name }));
   }
 }
+async function loadPdfFromBytes(bytes, name) {
+  try {
+    return await PDFDocument.load(bytes, { ignoreEncryption: true });
+  } catch (e) {
+    throw new Error(t("e.load", { name }));
+  }
+}
 
-function showResult(items, metaText) {
+/* 從來源 PDF 依 indices(0-based、含順序)產生子集/重排後的 PDF bytes。
+   優先走 copyPages(輸出最小);部分設計軟體輸出的 PDF 內部參照結構
+   會讓 copyPages 拋出 "Expected instance of ..." 錯誤,此時自動改用
+   「保留頁面法」:一次取得全部頁面物件 → 依目標順序附加到文件尾端 →
+   移除開頭原有各頁。全程不與 removePage 交錯呼叫 getPage(pdf-lib
+   1.17.1 的頁面快取在 removePage 後會過期,交錯呼叫會拿到錯的頁)。
+   代價:未使用的內嵌資源不會被剔除,輸出檔會比 copyPages 版大。 */
+async function buildSubsetPdf(srcDoc, srcBytes, indices) {
+  try {
+    const out = await PDFDocument.create();
+    const pages = await out.copyPages(srcDoc, indices);
+    pages.forEach(pg => out.addPage(pg));
+    return await out.save();
+  } catch (err) {
+    console.warn("copyPages 失敗,改用保留頁面法:", err);
+    const doc = await PDFDocument.load(srcBytes, { ignoreEncryption: true, throwOnInvalidObject: false });
+    const all = doc.getPages();
+    const n = all.length;
+    indices.forEach(i => doc.addPage(all[i]));
+    for (let i = 0; i < n; i++) doc.removePage(0);
+    return await doc.save();
+  }
+}
+
+function showResult(items, metaText, remindText) {
   downloads = items;
   const dlBox = document.getElementById("dlButtons");
   dlBox.innerHTML = "";
@@ -1276,6 +1415,9 @@ function showResult(items, metaText) {
     dlBox.appendChild(a);
   });
   document.getElementById("resultMeta").textContent = metaText || "";
+  const rem = document.getElementById("resultRemind");
+  if (remindText) { rem.textContent = "🔑 " + remindText; rem.style.display = "block"; }
+  else { rem.style.display = "none"; }
   document.getElementById("resultBox").style.display = "block";
   document.getElementById("progress").style.display = "none";
   document.getElementById("resultBox").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1302,6 +1444,8 @@ async function runTool() {
       case "extract":   await doExtract(); break;
       case "pagenum":   await doPageNum(); break;
       case "watermark": await doWatermark(); break;
+      case "protect":   await doProtect(); break;
+      case "unlock":    await doUnlock(); break;
     }
   } catch (err) {
     console.error(err);
@@ -1590,12 +1734,11 @@ function updatePreview() {
 async function doReorder() {
   if (!pageOrder.length) throw new Error(t("e.thumbWait"));
   setProgress(20, t("m.rebuild"));
-  const src = await loadWithPdfLib(files[0]);
-  const out = await PDFDocument.create();
-  const pages = await out.copyPages(src, pageOrder);
-  pages.forEach(p => out.addPage(p));
+  const srcBytes = await readBuf(files[0]);
+  const src = await loadPdfFromBytes(srcBytes, files[0].name);
+  setProgress(60, t("m.rebuild"));
+  const bytes = await buildSubsetPdf(src, srcBytes, pageOrder);
   setProgress(90, t("m.out"));
-  const bytes = await out.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
   const changed = pageOrder.some((v, i) => v !== i);
   showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.ro") + ".pdf" }],
@@ -1621,7 +1764,8 @@ async function doMerge() {
 
 /* ---------------- 分割 ---------------- */
 async function doSplit() {
-  const src = await loadWithPdfLib(files[0]);
+  const srcBytes = await readBuf(files[0]);
+  const src = await loadPdfFromBytes(srcBytes, files[0].name);
   const total = src.getPageCount();
   const name = baseName(files[0].name);
   let groups;
@@ -1633,10 +1777,7 @@ async function doSplit() {
   const items = [];
   for (let g = 0; g < groups.length; g++) {
     setProgress(10 + (g / groups.length) * 80, t("m.split", { i: g + 1, n: groups.length }));
-    const doc = await PDFDocument.create();
-    const pages = await doc.copyPages(src, groups[g]);
-    pages.forEach(p => doc.addPage(p));
-    const bytes = await doc.save();
+    const bytes = await buildSubsetPdf(src, srcBytes, groups[g]);
     const gp = groups[g];
     const label = gp.length === 1
       ? t("f.page", { n: gp[0] + 1 })
@@ -1814,17 +1955,16 @@ async function doRepair() {
 
 /* ---------------- 刪除頁面 ---------------- */
 async function doDelete() {
-  const doc = await loadWithPdfLib(files[0]);
+  const srcBytes = await readBuf(files[0]);
+  const doc = await loadPdfFromBytes(srcBytes, files[0].name);
   const total = doc.getPageCount();
   const del = parsePages(document.getElementById("deletePages").value, total);
   if (!del) throw new Error(t("e.delNeed"));
   if (del.length >= total) throw new Error(t("e.delAll"));
   const keep = doc.getPageIndices().filter(i => !del.includes(i));
-  const out = await PDFDocument.create();
-  const pages = await out.copyPages(doc, keep);
-  pages.forEach(p => out.addPage(p));
+  setProgress(60, t("m.out"));
+  const bytes = await buildSubsetPdf(doc, srcBytes, keep);
   setProgress(90, t("m.out"));
-  const bytes = await out.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
   showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.del") + ".pdf" }],
     t("r.del", { d: del.length, k: keep.length }) + " · " + fmtSize(blob.size));
@@ -1832,15 +1972,14 @@ async function doDelete() {
 
 /* ---------------- 擷取頁面 ---------------- */
 async function doExtract() {
-  const doc = await loadWithPdfLib(files[0]);
+  const srcBytes = await readBuf(files[0]);
+  const doc = await loadPdfFromBytes(srcBytes, files[0].name);
   const total = doc.getPageCount();
   const sel = parsePages(document.getElementById("extractPages").value, total);
   if (!sel) throw new Error(t("e.extNeed"));
-  const out = await PDFDocument.create();
-  const pages = await out.copyPages(doc, sel);
-  pages.forEach(p => out.addPage(p));
+  setProgress(60, t("m.out"));
+  const bytes = await buildSubsetPdf(doc, srcBytes, sel);
   setProgress(90, t("m.out"));
-  const bytes = await out.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
   showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.ext") + ".pdf" }],
     t("r.ext", { n: sel.length }) + " · " + fmtSize(blob.size));
@@ -1974,6 +2113,91 @@ async function doWatermark() {
   const blob = new Blob([bytes], { type: "application/pdf" });
   showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.wm") + ".pdf" }],
     t(type === "text" ? "r.wmT" : "r.wmL", { n: doc.getPageCount() }) + " · " + fmtSize(blob.size));
+}
+
+/* ---------------- 鎖定/解鎖:qpdf WASM 引擎 ---------------- */
+/* qpdf(業界標準 PDF 加解密工具)編譯成 WASM,首次使用時才從 jsDelivr
+   下載(qpdf.js ~52KB + qpdf.wasm ~1.3MB)。受限環境(如僅允許特定
+   CDN 的預覽沙箱)載入會失敗並顯示明確錯誤;正式部署網域可正常使用。
+   每次操作建立全新模組實例(Emscripten callMain 每實例僅能執行一次)。 */
+const QPDF_JS_URL = "https://cdn.jsdelivr.net/npm/@jspawn/qpdf-wasm@0.0.2/qpdf.js";
+const QPDF_WASM_URL = "https://cdn.jsdelivr.net/npm/@jspawn/qpdf-wasm@0.0.2/qpdf.wasm";
+let qpdfFactoryPromise = null;
+function loadQpdfFactory() {
+  if (!qpdfFactoryPromise) {
+    qpdfFactoryPromise = new Promise((resolve, reject) => {
+      const sc = document.createElement("script");
+      sc.src = QPDF_JS_URL;
+      sc.onload = () => {
+        if (typeof window.Module === "function") resolve(window.Module);
+        else reject(new Error(t("e.qpdfLoad")));
+      };
+      sc.onerror = () => reject(new Error(t("e.qpdfLoad")));
+      document.head.appendChild(sc);
+    }).catch(err => { qpdfFactoryPromise = null; throw err; });
+  }
+  return qpdfFactoryPromise;
+}
+async function runQpdf(args, inputBytes) {
+  const factory = await loadQpdfFactory();
+  let stderr = "";
+  const mod = await factory({
+    locateFile: () => QPDF_WASM_URL,
+    print: () => {},
+    printErr: msg => { stderr += msg + "\n"; },
+  });
+  mod.FS.writeFile("/in.pdf", new Uint8Array(inputBytes));
+  let code = 0;
+  try { code = mod.callMain(args) || 0; }
+  catch (e) { code = (e && e.status !== undefined) ? e.status : 1; }
+  let out = null;
+  try { out = mod.FS.readFile("/out.pdf"); } catch (_) {}
+  return { code, out, stderr };
+}
+
+function toggleLockHint() {
+  const el = document.getElementById("lockModeHint");
+  if (!el) return;
+  el.textContent = "🔐 " + t(chipState.lockMode === "restrict" ? "o.lockRestrictHint" : "o.lockOpenHint");
+}
+
+async function doProtect() {
+  const pwd = document.getElementById("lockPwd").value || "";
+  const pwd2 = document.getElementById("lockPwd2").value || "";
+  if (!pwd) throw new Error(t("e.pwdNeed"));
+  if (pwd !== pwd2) throw new Error(t("e.pwdMismatch"));
+  setProgress(10, t("m.qpdfLoad"));
+  const bytes = await readBuf(files[0]);
+  const args = chipState.lockMode === "restrict"
+    ? ["--encrypt", "", pwd, "256", "--print=none", "--modify=none", "--extract=n", "--", "/in.pdf", "/out.pdf"]
+    : ["--encrypt", pwd, pwd, "256", "--", "/in.pdf", "/out.pdf"];
+  setProgress(45, t("m.encrypting"));
+  const r = await runQpdf(args, bytes);
+  if (r.code !== 0 || !r.out)
+    throw new Error(t("e.qpdfFail") + (r.stderr ? r.stderr.split("\n")[0] : ""));
+  setProgress(90, t("m.out"));
+  const blob = new Blob([r.out], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.lock") + ".pdf" }],
+    t(chipState.lockMode === "restrict" ? "r.lockR" : "r.lockO") + " · " + fmtSize(blob.size),
+    t("r.lockRemind"));
+}
+
+async function doUnlock() {
+  setProgress(10, t("m.qpdfLoad"));
+  const bytes = await readBuf(files[0]);
+  setProgress(45, t("m.decrypting"));
+  // 以空密碼移除限制:權限保護檔可直接解除;若連開啟都需密碼會回報
+  // invalid password,此時給予明確引導(而非要求輸入這裡幫不上忙的密碼)。
+  const r = await runQpdf(["--password=", "--decrypt", "/in.pdf", "/out.pdf"], bytes);
+  if (r.code !== 0 || !r.out) {
+    if (/invalid password/i.test(r.stderr)) throw new Error(t("e.needOpenPwd"));
+    if (/not encrypted/i.test(r.stderr)) throw new Error(t("e.notLocked"));
+    throw new Error(t("e.qpdfFail") + (r.stderr ? r.stderr.split("\n")[0] : ""));
+  }
+  setProgress(90, t("m.out"));
+  const blob = new Blob([r.out], { type: "application/pdf" });
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.unlock") + ".pdf" }],
+    t("r.unlockPerm") + " · " + fmtSize(blob.size));
 }
 
 /* ---------------- 初始化 ---------------- */
