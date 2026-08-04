@@ -39,7 +39,8 @@ header{
   border-radius:999px;background:#fff;color:var(--ink);cursor:pointer;
 }
 .lang-sel:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
-main{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+main{max-width:min(1500px,94vw);margin:0 auto;padding:40px 24px 80px}
+#home{max-width:1080px;margin-inline:auto}
 .hero{text-align:center;margin-bottom:44px}
 .hero h1{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.25}
 .hero h1 span{color:var(--accent)}
@@ -195,6 +196,86 @@ input[type=color]{
 .hint{font-size:.78rem;color:var(--ink-soft);margin-top:10px;line-height:1.6}
 footer{text-align:center;padding:30px;font-size:.75rem;color:var(--ink-soft);border-top:1px solid var(--line)}
 @media(max-width:560px){.opt-row label{min-width:100%}.header-note{display:none}}
+
+/* ---- 整理 PDF 統一畫布 ---- */
+.org-box{margin-top:6px}
+.org-note{font-size:.82rem;color:var(--ink-soft);margin-bottom:12px}
+.org-wrap{display:flex;gap:10px;align-items:flex-start}
+.org-canvas{flex:1;min-width:0;border:1px dashed #d6c7ae;border-radius:14px;padding:14px;background:var(--card)}
+.org-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;min-height:60px}
+.org-page{position:relative;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;cursor:grab;box-shadow:var(--shadow);user-select:none;transition:transform .15s,border-color .15s}
+.org-page:hover{border-color:#d9c9b4;transform:translateY(-2px)}
+.org-page.dragging{opacity:.35;cursor:grabbing;border-color:var(--accent)}
+.org-page img{width:100%;display:block;border-radius:4px;pointer-events:none;border:1px solid #eee}
+.org-page .srcbar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:10px 0 0 10px}
+.org-page .pnum{position:absolute;top:-8px;left:-8px;background:var(--ink);color:#fff;font-size:.7rem;font-weight:700;border-radius:999px;padding:3px 9px;box-shadow:var(--shadow);z-index:2}
+.org-del{position:absolute;top:4px;right:4px;border:1px solid var(--line);background:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:.72rem;line-height:1;color:var(--ink-soft);opacity:0;transition:opacity .15s;padding:0}
+.org-page:hover .org-del{opacity:1}
+.org-del:hover{border-color:#b91c1c;color:#b91c1c}
+@media(hover:none){.org-del{opacity:1}}
+.org-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:.72rem;color:var(--ink-soft)}
+.org-legend .lg{display:inline-flex;align-items:center;gap:5px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.org-legend .muted{color:#a89e8d}
+.org-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.org-rail{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:8px;flex-shrink:0}
+.org-rbtn{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:1.2rem;line-height:1;color:var(--ink-soft);position:relative;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);font-family:inherit}
+.org-rbtn:hover{border-color:var(--accent);color:var(--accent)}
+.org-rbtn.accent{color:var(--accent);border-color:#f0c9a8}
+.org-rbtn.danger:hover{border-color:#b91c1c;color:#b91c1c}
+.org-rbtn .tip{position:absolute;right:54px;top:50%;transform:translateY(-50%);background:var(--ink);color:#fff;font-size:.72rem;padding:4px 9px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:var(--shadow)}
+.org-rbtn:hover .tip{opacity:1}
+.org-sources{display:flex;gap:5px}
+.org-src{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:.8rem;line-height:1;color:var(--ink-soft);padding:0;font-family:inherit}
+.org-src:hover{border-color:var(--accent);color:var(--accent)}
+.org-side{width:196px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
+.org-panel{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;box-shadow:var(--shadow)}
+.org-panel-t{font-size:.74rem;color:var(--ink-soft);margin-bottom:8px}
+.org-panel-t.danger{color:#b45309}
+.org-doc{display:flex;align-items:center;gap:7px;padding:6px 4px;font-size:.8rem;border-radius:8px;cursor:grab}
+.org-doc.dragging{opacity:.4;background:var(--accent-soft)}
+.org-doc+.org-doc{border-top:1px solid var(--line)}
+.org-grip{color:#c9bda8;font-size:.7rem;cursor:grab}
+.org-dname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.org-docrm{border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:.75rem;padding:2px 4px;font-family:inherit}
+.org-docrm:hover{color:#b91c1c}
+.org-trashwrap{border:1px solid #f0d2c2;background:#fdf3ee;border-radius:12px;padding:12px}
+.org-trash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.org-trash-page{position:relative;border:1px solid var(--line);border-radius:5px;overflow:hidden;cursor:pointer;opacity:.55;background:#fff}
+.org-trash-page:hover{opacity:.8}
+.org-trash-page.sel{opacity:1;outline:2px solid var(--accent);outline-offset:-1px}
+.org-trash-page img{width:100%;display:block}
+.org-trash-page .srcbar{position:absolute;left:0;top:0;bottom:0;width:4px}
+.org-restore{margin-top:10px;width:100%;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px;font-family:inherit;font-size:.78rem;cursor:pointer;color:var(--ink)}
+.org-restore:hover{border-color:var(--accent);color:var(--accent)}
+.org-hint{font-size:.74rem;color:var(--ink-soft);line-height:1.5}
+.org-loading{padding:40px;text-align:center;color:var(--ink-soft);font-size:.9rem}
+@media(max-width:760px){.org-wrap{flex-wrap:wrap}.org-side{width:100%;flex-direction:row}.org-side>*{flex:1}.org-rail{flex-direction:row;width:100%;justify-content:center;padding-top:0;order:-1}.org-rbtn .tip{display:none}}
+
+/* ---- 結果頁「接著做」續作列 ---- */
+.continue-bar{margin-top:18px;border-top:1px solid var(--line);padding-top:16px;text-align:left}
+.cont-cap{font-size:.82rem;color:var(--ink-soft);margin-bottom:10px}
+.cont-chips{display:flex;flex-wrap:wrap;gap:8px}
+.cont-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;font-family:inherit;font-size:.84rem;color:var(--ink);cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s}
+.cont-chip:hover{border-color:var(--accent);color:var(--accent-deep);transform:translateY(-1px);box-shadow:var(--shadow)}
+.cont-chip .ci{font-size:1.05rem;line-height:1}
+
+/* ---- 添加來源:滑過展開選單 ---- */
+.org-add{position:relative;display:flex}
+.org-add-menu{position:absolute;right:56px;top:-6px;display:flex;flex-direction:column;gap:2px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:7px;box-shadow:0 8px 24px rgba(60,40,20,.16);opacity:0;visibility:hidden;transform:translateX(6px);transition:opacity .15s,transform .15s,visibility .15s;white-space:nowrap;z-index:8}
+.org-add:hover .org-add-menu,.org-add:focus-within .org-add-menu{opacity:1;visibility:visible;transform:translateX(0)}
+.org-add-menu::after{content:"";position:absolute;right:-12px;top:0;bottom:0;width:12px}
+.org-add-h{font-size:.68rem;color:var(--ink-soft);padding:2px 10px 6px;border-bottom:1px solid var(--line);margin-bottom:3px}
+.org-add-menu button{display:flex;align-items:center;gap:9px;border:none;background:none;font-family:inherit;font-size:.82rem;color:var(--ink);padding:8px 12px;border-radius:8px;cursor:pointer;text-align:left;width:100%}
+.org-add-menu button span{font-size:1rem;width:18px;text-align:center;flex-shrink:0}
+.org-add-menu button:hover{background:var(--accent-soft);color:var(--accent-deep)}
+@media(max-width:760px){.org-add-menu{right:auto;left:0;top:54px;transform:translateY(-6px)}.org-add:hover .org-add-menu,.org-add:focus-within .org-add-menu{transform:translateY(0)}}
+
+/* ---- A4 統一開關 ---- */
+.org-topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.org-topbar .org-note{margin-bottom:0}
+.org-a4{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;user-select:none;white-space:nowrap}
+.org-a4:hover{border-color:var(--accent)}
+.org-a4 input{accent-color:var(--accent);cursor:pointer;margin:0}
 </style>
 </head>
 <body>
@@ -236,6 +317,7 @@ footer{text-align:center;padding:30px;font-size:.75rem;color:var(--ink-soft);bor
     <div class="filelist" id="fileList"></div>
     <div class="grid-note" id="gridNote"></div>
     <div class="page-grid" id="pageGrid"></div>
+    <div id="organizeBox" class="org-box" style="display:none"></div>
     <div class="options" id="optionsBox"></div>
     <div class="pv" id="previewBox">
       <div class="pv-cap" id="pvCap"></div>
@@ -254,6 +336,10 @@ footer{text-align:center;padding:30px;font-size:.75rem;color:var(--ink-soft);bor
       <h4 id="resTitle"></h4>
       <p id="resultMeta"></p>
       <div id="dlButtons"></div>
+      <div id="continueBar" class="continue-bar" style="display:none">
+        <div class="cont-cap" id="contCap"></div>
+        <div class="cont-chips" id="contChips"></div>
+      </div>
       <p id="resultRemind" style="display:none;margin-top:14px;font-size:.82rem;color:var(--accent-deep);background:var(--accent-soft);border:1px solid #f5d9c6;border-radius:10px;padding:10px 14px"></p>
       <br><button class="btn-again" id="btnAgain" onclick="resetTool()"></button>
     </div>
@@ -303,6 +389,10 @@ const I18N = {
 "ui.note":"檔案完全在您的瀏覽器內處理,不會上傳到任何伺服器",
 "ui.heroTitle":"你需要的 <span>PDF 工具</span>,全部在這裡",
 "ui.heroSub":"合併、分割、壓縮、轉換 —— 免安裝、免註冊、免上傳,開啟即用。",
+"organize.n":"整理 PDF","organize.d":"合併多份 PDF、拖曳排序、刪除不要的頁,一次搞定。","organize.h":"可加入多份檔案;拖曳縮圖排序,點右上垃圾桶圖示移除頁面,誤刪可從右側垃圾桶回復",
+"org.canvasNote":"拖曳縮圖排序 · 滑過縮圖點右上移入垃圾桶","org.add":"添加文檔","org.local":"本地檔案","org.gdrive":"Google 雲端","org.dropbox":"Dropbox","org.cloudSoon":"雲端匯入功能即將推出,目前請先從本地檔案添加","org.sort":"按名稱排序","org.reset":"全部重置","org.docList":"文檔清單","org.removeDoc":"移除此檔","org.trash":"暫存垃圾桶","org.restore":"回復所選","org.trashEmpty":"刪掉的頁會暫存在這裡,可再選取回復","org.delPage":"移入垃圾桶","org.out":"輸出 PDF →","org.empty":"先添加 PDF 檔案,即可開始整理","org.reading":"讀取檔案中…","org.legend":"左側色條 = 頁面來源","r.organize":"已整理輸出 {p} 頁(來自 {n} 份檔案)","f.organize":"整理","e.orgEmpty":"畫布上沒有頁面,請先添加檔案或從垃圾桶回復頁面",
+"cont.cap":"接著用這份結果繼續(不需重新上傳,選項依檔案型別顯示)",
+"org.a4":"統一輸出為 A4 尺寸",
 "ui.back":"← 返回所有工具",
 "ui.dzClick":"點擊選擇檔案,或將檔案拖曳到這裡",
 "ui.dzMulti":"可一次選擇多個檔案 · ","ui.dzFmt":"支援格式:",
@@ -389,6 +479,10 @@ const I18N = {
 "ui.note":"文件完全在您的浏览器内处理,不会上传到任何服务器",
 "ui.heroTitle":"你需要的 <span>PDF 工具</span>,全部在这里",
 "ui.heroSub":"合并、拆分、压缩、转换 —— 免安装、免注册、免上传,打开即用。",
+"organize.n":"整理 PDF","organize.d":"合并多份 PDF、拖拽排序、删除不要的页,一次搞定。","organize.h":"可加入多份文件;拖拽缩略图排序,点右上回收站图标移除页面,误删可从右侧回收站恢复",
+"org.canvasNote":"拖拽缩略图排序 · 划过缩略图点右上移入回收站","org.add":"添加文档","org.local":"本地文件","org.gdrive":"Google 云端","org.dropbox":"Dropbox","org.cloudSoon":"云端导入功能即将推出,目前请先从本地文件添加","org.sort":"按名称排序","org.reset":"全部重置","org.docList":"文档清单","org.removeDoc":"移除此文件","org.trash":"暂存回收站","org.restore":"恢复所选","org.trashEmpty":"删掉的页会暂存在这里,可再选取恢复","org.delPage":"移入回收站","org.out":"输出 PDF →","org.empty":"先添加 PDF 文件,即可开始整理","org.reading":"读取文件中…","org.legend":"左侧色条 = 页面来源","r.organize":"已整理输出 {p} 页(来自 {n} 份文件)","f.organize":"整理","e.orgEmpty":"画布上没有页面,请先添加文件或从回收站恢复页面",
+"cont.cap":"接着用这份结果继续(无需重新上传,选项依文件类型显示)",
+"org.a4":"统一输出为 A4 尺寸",
 "ui.back":"← 返回所有工具",
 "ui.dzClick":"点击选择文件,或将文件拖拽到这里",
 "ui.dzMulti":"可一次选择多个文件 · ","ui.dzFmt":"支持格式:",
@@ -475,6 +569,10 @@ const I18N = {
 "ui.note":"Files are processed entirely in your browser — nothing is uploaded",
 "ui.heroTitle":"Every <span>PDF tool</span> you need, in one place",
 "ui.heroSub":"Merge, split, compress, convert — no install, no sign-up, no upload.",
+"organize.n":"Organize PDF","organize.d":"Merge PDFs, drag to reorder, and delete pages — all on one canvas.","organize.h":"Add multiple files; drag thumbnails to reorder, click the bin icon to trash a page, and restore from the trash on the right",
+"org.canvasNote":"Drag thumbnails to reorder · hover a page and click the bin to trash it","org.add":"Add files","org.local":"Local files","org.gdrive":"Google Drive","org.dropbox":"Dropbox","org.cloudSoon":"Cloud import is coming soon — for now please add local files","org.sort":"Sort by name","org.reset":"Reset all","org.docList":"Documents","org.removeDoc":"Remove this file","org.trash":"Trash","org.restore":"Restore selected","org.trashEmpty":"Deleted pages are kept here — select and restore anytime","org.delPage":"Move to trash","org.out":"Export PDF →","org.empty":"Add PDF files to start organizing","org.reading":"Reading files…","org.legend":"Left color bar = source file","r.organize":"Organized {p} pages from {n} file(s)","f.organize":"organized","e.orgEmpty":"No pages on the canvas — add files or restore pages from the trash",
+"cont.cap":"Keep going with this result — no re-upload needed",
+"org.a4":"Normalize pages to A4",
 "ui.back":"← All tools",
 "ui.dzClick":"Click to choose files, or drag & drop here",
 "ui.dzMulti":"Multiple files allowed · ","ui.dzFmt":"Supported: ",
@@ -561,6 +659,10 @@ const I18N = {
 "ui.note":"ファイルはブラウザ内で処理され、サーバーには一切送信されません",
 "ui.heroTitle":"必要な<span>PDFツール</span>が、すべてここに",
 "ui.heroSub":"結合・分割・圧縮・変換 — インストール不要、登録不要、アップロード不要。",
+"organize.n":"PDF 整理","organize.d":"複数の PDF を結合し、ドラッグで並べ替え、不要なページを削除。","organize.h":"複数ファイルを追加できます。サムネイルをドラッグして並べ替え、右上のゴミ箱でページを削除、右側のゴミ箱から復元も可能",
+"org.canvasNote":"サムネイルをドラッグして並べ替え · 右上のゴミ箱で削除","org.add":"ファイル追加","org.local":"ローカル","org.gdrive":"Google ドライブ","org.dropbox":"Dropbox","org.cloudSoon":"クラウド取り込みは近日対応。今はローカルから追加してください","org.sort":"名前で並べ替え","org.reset":"すべてリセット","org.docList":"ドキュメント","org.removeDoc":"このファイルを削除","org.trash":"ゴミ箱","org.restore":"選択を復元","org.trashEmpty":"削除したページはここに保管。選んで復元できます","org.delPage":"ゴミ箱へ","org.out":"PDF を書き出す →","org.empty":"PDF ファイルを追加すると整理を開始できます","org.reading":"ファイルを読み込み中…","org.legend":"左の色帯 = ページの出所","r.organize":"{n} 個のファイルから {p} ページを整理しました","f.organize":"整理","e.orgEmpty":"キャンバスにページがありません。ファイルを追加するかゴミ箱から復元してください",
+"cont.cap":"この結果を使って続ける(再アップロード不要)",
+"org.a4":"すべて A4 サイズに統一",
 "ui.back":"← ツール一覧へ",
 "ui.dzClick":"クリックしてファイルを選択、またはここにドラッグ",
 "ui.dzMulti":"複数選択可 · ","ui.dzFmt":"対応形式:",
@@ -647,6 +749,10 @@ const I18N = {
 "ui.note":"파일은 브라우저에서만 처리되며 서버로 전송되지 않습니다",
 "ui.heroTitle":"필요한 <span>PDF 도구</span>, 모두 여기에",
 "ui.heroSub":"병합·분할·압축·변환 — 설치, 가입, 업로드 없이 바로 사용.",
+"organize.n":"PDF 정리","organize.d":"여러 PDF 를 병합하고 드래그로 순서를 바꾸고 페이지를 삭제 — 한 화면에서.","organize.h":"여러 파일을 추가할 수 있습니다. 썸네일을 드래그해 순서를 바꾸고, 오른쪽 위 휴지통으로 페이지를 삭제하며, 오른쪽 휴지통에서 복원할 수 있습니다",
+"org.canvasNote":"썸네일을 드래그해 정렬 · 오른쪽 위 휴지통으로 삭제","org.add":"파일 추가","org.local":"로컬 파일","org.gdrive":"Google 드라이브","org.dropbox":"Dropbox","org.cloudSoon":"클라우드 가져오기는 곧 지원됩니다. 지금은 로컬 파일로 추가해 주세요","org.sort":"이름순 정렬","org.reset":"전체 초기화","org.docList":"문서 목록","org.removeDoc":"이 파일 제거","org.trash":"임시 휴지통","org.restore":"선택 복원","org.trashEmpty":"삭제한 페이지는 여기 보관됩니다. 선택해 복원하세요","org.delPage":"휴지통으로","org.out":"PDF 내보내기 →","org.empty":"PDF 파일을 추가하면 정리를 시작할 수 있습니다","org.reading":"파일 읽는 중…","org.legend":"왼쪽 색 막대 = 페이지 출처","r.organize":"{n}개 파일에서 {p}페이지를 정리했습니다","f.organize":"정리","e.orgEmpty":"캔버스에 페이지가 없습니다. 파일을 추가하거나 휴지통에서 복원하세요",
+"cont.cap":"이 결과로 계속 작업(다시 업로드 불필요)",
+"org.a4":"모든 페이지를 A4로 통일",
 "ui.back":"← 전체 도구",
 "ui.dzClick":"클릭하여 파일 선택 또는 여기로 드래그",
 "ui.dzMulti":"여러 파일 선택 가능 · ","ui.dzFmt":"지원 형식: ",
@@ -758,6 +864,8 @@ function setLang(l) {
     applyToolHeader();
     renderFiles();
     renderOptions();
+    if (currentTool === "organize") renderOrganize();
+    if (document.getElementById("resultBox").style.display === "block" && downloads.length) renderContinueBar(downloads);
     if (pageThumbs.length) {
       document.getElementById("gridNote").textContent = t(noteKeyFor(currentTool));
       if (currentTool === "reorder") renderPageGrid();
@@ -783,10 +891,8 @@ function applyStatic() {
 
 /* ---------------- 工具定義(結構欄位;文字皆走 i18n) ---------------- */
 const TOOLS = {
-  merge:   { cat:"organize", ico:"🗂️", accept:".pdf", multiple:true },
-  reorder: { cat:"organize", ico:"🔀", accept:".pdf", multiple:false },
+  organize:{ cat:"organize", ico:"🗂️", accept:".pdf", multiple:true },
   split:   { cat:"organize", ico:"✂️", accept:".pdf", multiple:false },
-  delete:  { cat:"organize", ico:"🗑️", accept:".pdf", multiple:false },
   extract: { cat:"organize", ico:"📑", accept:".pdf", multiple:false },
   compress:{ cat:"optimize", ico:"🗜️", accept:".pdf", multiple:false },
   repair:  { cat:"optimize", ico:"🛠️", accept:".pdf", multiple:false },
@@ -990,6 +1096,11 @@ let wmLogoImg = null;
 let pvTimer = null;
 const PREVIEW_TOOLS = ["watermark", "pagenum"];
 const SELECT_TOOLS = ["split", "delete", "extract"];
+let orgDocs = [], orgPages = [], orgTrash = [], orgSel = new Set(), orgSeq = 0;
+const ORG_COLORS = ["#c2410c","#1d4ed8","#166534","#7c3aed","#0891b2","#b45309","#be123c","#4d7c0f"];
+let lastResultFile = null;
+const CONTINUE_PDF = ["organize","pagenum","watermark","compress","rotate","crop","extract","split","pdf2jpg","protect"];
+let orgForceA4 = true;
 
 /* ---------------- 首頁:分類標籤 + 工具卡片 ---------------- */
 const grid = document.getElementById("toolGrid");
@@ -1058,6 +1169,13 @@ function resetTool() {
   document.getElementById("resultBox").style.display = "none";
   document.getElementById("progress").style.display = "none";
   document.getElementById("runBtn").disabled = false;
+  document.getElementById("runBtn").textContent = t("ui.run");
+  orgDocs = []; orgPages = []; orgTrash = []; orgSel = new Set(); orgSeq = 0;
+  document.getElementById("organizeBox").style.display = "none";
+  document.getElementById("organizeBox").innerHTML = "";
+  document.getElementById("dropzone").style.display = "";
+  document.getElementById("runBar").style.display = "none";
+  document.getElementById("fileList").innerHTML = "";
   renderFiles();
   renderOptions();
 }
@@ -1072,6 +1190,7 @@ dz.ondragleave = () => dz.classList.remove("drag");
 dz.ondrop = e => { e.preventDefault(); dz.classList.remove("drag"); addFiles([...e.dataTransfer.files]); };
 
 function addFiles(list) {
+  if (currentTool === "organize") { addOrganizeFiles(list); return; }
   const cfg = TOOLS[currentTool];
   const exts = cfg.accept.split(",").map(s => s.trim().toLowerCase());
   const valid = list.filter(f => exts.some(ext => f.name.toLowerCase().endsWith(ext)));
@@ -1089,6 +1208,7 @@ function addFiles(list) {
 }
 
 function renderFiles() {
+  if (currentTool === "organize") { document.getElementById("fileList").innerHTML = ""; return; }
   const box = document.getElementById("fileList");
   box.innerHTML = "";
   const cfg = TOOLS[currentTool] || {};
@@ -1418,9 +1538,38 @@ function showResult(items, metaText, remindText) {
   const rem = document.getElementById("resultRemind");
   if (remindText) { rem.textContent = "🔑 " + remindText; rem.style.display = "block"; }
   else { rem.style.display = "none"; }
+  renderContinueBar(items);
   document.getElementById("resultBox").style.display = "block";
   document.getElementById("progress").style.display = "none";
   document.getElementById("resultBox").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ================= 結果頁「接著做」續作列 ================= */
+function renderContinueBar(items){
+  const cb = document.getElementById("continueBar");
+  const chips = document.getElementById("contChips");
+  const single = items.length === 1;
+  const isPdf = single && /\.pdf$/i.test(items[0].filename);
+  if (isPdf && currentTool !== "protect"){
+    lastResultFile = new File([items[0].blob], items[0].filename, { type: "application/pdf" });
+    const set = CONTINUE_PDF.filter(k => k !== currentTool && TOOLS[k]);
+    chips.innerHTML = set.map(k =>
+      '<button class="cont-chip" onclick="continueWith(\'' + k + '\')"><span class="ci">' + TOOLS[k].ico + '</span>' + t(k + ".n") + '</button>'
+    ).join("");
+    document.getElementById("contCap").textContent = t("cont.cap");
+    cb.style.display = "block";
+  } else {
+    lastResultFile = null;
+    cb.style.display = "none";
+  }
+}
+
+function continueWith(tool){
+  if (!lastResultFile || !TOOLS[tool]) return;
+  const f = lastResultFile;
+  openTool(tool);          // 切換工具並清空(resultBox 隨之隱藏)
+  addFiles([f]);           // 沿用結果作為新輸入,走既有處理路徑
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 /* ---------------- 主流程 ---------------- */
@@ -1431,6 +1580,7 @@ async function runTool() {
   try {
     setProgress(5, t("m.read"));
     switch (currentTool) {
+      case "organize":  await doOrganize(); break;
       case "merge":     await doMerge(); break;
       case "reorder":   await doReorder(); break;
       case "split":     await doSplit(); break;
@@ -2198,6 +2348,295 @@ async function doUnlock() {
   const blob = new Blob([r.out], { type: "application/pdf" });
   showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.unlock") + ".pdf" }],
     t("r.unlockPerm") + " · " + fmtSize(blob.size));
+}
+
+/* ================= 整理 PDF:合併 + 排序 + 刪頁 統一畫布 ================= */
+function orgDocById(id){ return orgDocs.find(d => d.id === id); }
+
+async function addOrganizeFiles(list){
+  const valid = [...list].filter(f => f.name.toLowerCase().endsWith(".pdf"));
+  if (valid.length < list.length) alert(t("e.skip"));
+  if (!valid.length) return;
+  const box = document.getElementById("organizeBox");
+  document.getElementById("dropzone").style.display = "none";
+  box.style.display = "block";
+  if (!orgDocs.length) box.innerHTML = '<div class="org-loading">' + t("org.reading") + '</div>';
+  for (const f of valid){
+    try {
+      const doc = await buildOrgDoc(f, box);
+      orgDocs.push(doc);
+      doc.thumbs.forEach((_, i) => orgPages.push({ docId: doc.id, srcIdx: i }));
+    } catch(e){ console.error(e); alert(t("e.load", { name: f.name })); }
+  }
+  document.getElementById("fileInput").value = "";
+  if (!orgDocs.length){ resetTool(); return; }
+  renderOrganize();
+}
+
+async function buildOrgDoc(file, box){
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  const thumbs = [];
+  for (let i = 1; i <= pdf.numPages; i++){
+    const ld = box && box.querySelector(".org-loading");
+    if (ld) ld.textContent = t("org.reading") + " (" + i + "/" + pdf.numPages + ")";
+    const page = await pdf.getPage(i);
+    const vp1 = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: 180 / vp1.width });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    thumbs.push(canvas.toDataURL("image/jpeg", 0.72));
+  }
+  pdf.destroy();
+  const color = ORG_COLORS[orgDocs.length % ORG_COLORS.length];
+  return { id: "d" + (orgSeq++), file, name: file.name, color, thumbs };
+}
+
+function renderOrganize(){
+  const box = document.getElementById("organizeBox");
+  if (!orgDocs.length){
+    box.style.display = "none"; box.innerHTML = "";
+    document.getElementById("dropzone").style.display = "";
+    document.getElementById("runBar").style.display = "none";
+    return;
+  }
+  document.getElementById("dropzone").style.display = "none";
+  box.style.display = "block";
+  box.innerHTML =
+    '<div class="org-topbar">' +
+      '<div class="org-note">' + t("org.canvasNote") + '</div>' +
+      '<label class="org-a4"><input type="checkbox" id="orgA4"' + (orgForceA4 ? " checked" : "") + ' onchange="orgForceA4=this.checked"> ' + t("org.a4") + '</label>' +
+    '</div>' +
+    '<div class="org-wrap">' +
+      '<div class="org-canvas"><div class="org-grid" id="orgGrid"></div><div class="org-legend" id="orgLegend"></div></div>' +
+      '<div class="org-rail">' +
+        '<div class="org-add">' +
+          '<button class="org-rbtn accent" onclick="orgPick()">+</button>' +
+          '<div class="org-add-menu">' +
+            '<div class="org-add-h">' + t("org.add") + '</div>' +
+            '<button onclick="orgPick()"><span>\u{1F5A5}</span>' + t("org.local") + '</button>' +
+            '<button onclick="orgCloud()"><span>\u2601</span>' + t("org.gdrive") + '</button>' +
+            '<button onclick="orgCloud()"><span>\u2913</span>' + t("org.dropbox") + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<button class="org-rbtn" onclick="orgSortByName()"><span class="tip">' + t("org.sort") + '</span>\u21C5</button>' +
+        '<button class="org-rbtn danger" onclick="orgResetAll()"><span class="tip">' + t("org.reset") + '</span>\u21BA</button>' +
+      '</div>' +
+      '<div class="org-side">' +
+        '<div class="org-panel"><div class="org-panel-t">' + t("org.docList") + '</div><div id="orgDocList"></div></div>' +
+        '<div class="org-trashwrap"><div class="org-panel-t danger">\u{1F5D1} ' + t("org.trash") + '</div><div id="orgTrashBox"></div></div>' +
+      '</div>' +
+    '</div>';
+  renderOrgGrid(); renderOrgDocList(); renderOrgTrash(); renderOrgLegend();
+  const rb = document.getElementById("runBar");
+  rb.style.display = "block";
+  const btn = document.getElementById("runBtn");
+  btn.textContent = t("org.out");
+  btn.disabled = orgPages.length === 0;
+}
+
+function orgPick(){ document.getElementById("fileInput").click(); }
+function orgCloud(){ alert(t("org.cloudSoon")); }
+
+function renderOrgGrid(){
+  const g = document.getElementById("orgGrid");
+  if (!g) return;
+  g.innerHTML = "";
+  orgPages.forEach((pg, pos) => {
+    const d = orgDocById(pg.docId);
+    const key = pg.docId + ":" + pg.srcIdx;
+    const card = document.createElement("div");
+    card.className = "org-page";
+    card.draggable = true;
+    card.dataset.key = key;
+    card.innerHTML =
+      '<span class="srcbar" style="background:' + d.color + '"></span>' +
+      '<span class="pnum">' + (pos + 1) + '</span>' +
+      '<img src="' + d.thumbs[pg.srcIdx] + '" alt="">' +
+      '<button class="org-del" title="' + t("org.delPage") + '" onclick="orgDeletePage(event,\'' + key + '\')">\u{1F5D1}</button>';
+    addDragBehavior(card, g, syncOrganizeFromDom);
+    g.appendChild(card);
+  });
+}
+
+function syncOrganizeFromDom(){
+  const g = document.getElementById("orgGrid");
+  orgPages = [...g.children].map(c => {
+    const [docId, srcIdx] = c.dataset.key.split(":");
+    return { docId, srcIdx: +srcIdx };
+  });
+  renderOrgGrid();
+}
+
+function orgDeletePage(e, key){
+  e.stopPropagation();
+  const [docId, srcIdx] = key.split(":"); const si = +srcIdx;
+  const idx = orgPages.findIndex(p => p.docId === docId && p.srcIdx === si);
+  if (idx < 0) return;
+  orgTrash.push(orgPages[idx]);
+  orgPages.splice(idx, 1);
+  renderOrgGrid(); renderOrgTrash();
+  document.getElementById("runBtn").disabled = orgPages.length === 0;
+}
+
+function renderOrgTrash(){
+  const box = document.getElementById("orgTrashBox");
+  if (!box) return;
+  if (!orgTrash.length){ box.innerHTML = '<div class="org-hint">' + t("org.trashEmpty") + '</div>'; return; }
+  let html = '<div class="org-trash-grid">';
+  orgTrash.forEach(pg => {
+    const d = orgDocById(pg.docId); const key = pg.docId + ":" + pg.srcIdx;
+    html += '<div class="org-trash-page' + (orgSel.has(key) ? " sel" : "") + '" onclick="orgToggleTrash(\'' + key + '\')">' +
+            '<span class="srcbar" style="background:' + d.color + '"></span>' +
+            '<img src="' + d.thumbs[pg.srcIdx] + '" alt=""></div>';
+  });
+  html += '</div><button class="org-restore" onclick="orgRestore()">\u21A9 ' + t("org.restore") + '</button>';
+  box.innerHTML = html;
+}
+
+function orgToggleTrash(key){
+  if (orgSel.has(key)) orgSel.delete(key); else orgSel.add(key);
+  renderOrgTrash();
+}
+
+function orgRestore(){
+  if (!orgSel.size) return;
+  const back = [];
+  orgTrash = orgTrash.filter(pg => {
+    if (orgSel.has(pg.docId + ":" + pg.srcIdx)){ back.push(pg); return false; }
+    return true;
+  });
+  orgPages = orgPages.concat(back);
+  orgSel.clear();
+  renderOrgGrid(); renderOrgTrash();
+  document.getElementById("runBtn").disabled = orgPages.length === 0;
+}
+
+function renderOrgDocList(){
+  const box = document.getElementById("orgDocList");
+  if (!box) return;
+  box.innerHTML = "";
+  orgDocs.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "org-doc";
+    row.draggable = true;
+    row.dataset.id = d.id;
+    row.innerHTML =
+      '<span class="org-grip">\u22EE\u22EE</span>' +
+      '<span class="org-dot" style="background:' + d.color + '"></span>' +
+      '<span class="org-dname" title="' + escapeHtml(d.name) + '">' + escapeHtml(d.name) + '</span>' +
+      '<button class="org-docrm" title="' + t("org.removeDoc") + '" onclick="orgRemoveDoc(event,\'' + d.id + '\')">\u2715</button>';
+    addDragBehavior(row, box, orgReorderDocsFromDom);
+    box.appendChild(row);
+  });
+}
+
+function orgReorderDocsFromDom(){
+  const box = document.getElementById("orgDocList");
+  const ids = [...box.children].map(c => c.dataset.id);
+  orgDocs = ids.map(id => orgDocById(id));
+  orgRelayoutByDocOrder();
+}
+
+function orgRelayoutByDocOrder(){
+  const trashed = new Set(orgTrash.map(p => p.docId + ":" + p.srcIdx));
+  const pages = [];
+  orgDocs.forEach(d => d.thumbs.forEach((_, i) => {
+    if (!trashed.has(d.id + ":" + i)) pages.push({ docId: d.id, srcIdx: i });
+  }));
+  orgPages = pages;
+  renderOrgGrid();
+  const btn = document.getElementById("runBtn");
+  if (btn) btn.disabled = orgPages.length === 0;
+}
+
+function orgSortByName(){
+  orgDocs.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+  orgRelayoutByDocOrder();
+  renderOrgDocList();
+  renderOrgLegend();
+}
+
+function orgRemoveDoc(e, id){
+  e.stopPropagation();
+  orgDocs = orgDocs.filter(d => d.id !== id);
+  orgPages = orgPages.filter(p => p.docId !== id);
+  orgTrash = orgTrash.filter(p => p.docId !== id);
+  orgSel = new Set([...orgSel].filter(k => !k.startsWith(id + ":")));
+  if (!orgDocs.length){ resetTool(); return; }
+  renderOrganize();
+}
+
+function orgResetAll(){
+  if (!orgDocs.length){ resetTool(); return; }
+  orgDocs.sort((a, b) => (+a.id.slice(1)) - (+b.id.slice(1)));   // 還原匯入順序
+  orgTrash = []; orgSel = new Set();                             // 清空垃圾桶與選取
+  const pages = [];
+  orgDocs.forEach(d => d.thumbs.forEach((_, i) => pages.push({ docId: d.id, srcIdx: i })));
+  orgPages = pages;                                              // 全部頁面、原始順序
+  renderOrganize();
+}
+
+function renderOrgLegend(){
+  const el = document.getElementById("orgLegend");
+  if (!el) return;
+  el.innerHTML = orgDocs.map(d =>
+    '<span class="lg"><span class="org-dot" style="background:' + d.color + '"></span>' + escapeHtml(d.name) + '</span>'
+  ).join("") + '<span class="lg muted">' + t("org.legend") + '</span>';
+}
+
+async function doOrganize(){
+  if (!orgPages.length) throw new Error(t("e.orgEmpty"));
+  const out = await PDFDocument.create();
+  const cache = new Map();
+  const used = new Set();
+  const a4 = orgForceA4;
+  const A4W = 595.28, A4H = 841.89;
+  for (let i = 0; i < orgPages.length; i++){
+    setProgress(10 + (i / orgPages.length) * 80, t("m.rebuild"));
+    const { docId, srcIdx } = orgPages[i];
+    used.add(docId);
+    let src = cache.get(docId);
+    if (!src){ src = await loadWithPdfLib(orgDocById(docId).file); cache.set(docId, src); }
+    if (a4){
+      try {
+        const srcPage = src.getPage(srcIdx);
+        const R = (((srcPage.getRotation().angle % 360) + 360) % 360);
+        const a = (360 - R) % 360;                 // 逆時針補正,使內容正立
+        const emb = await out.embedPage(srcPage);
+        const BW = emb.width, BH = emb.height;
+        const swap = (a === 90 || a === 270);
+        const visW0 = swap ? BH : BW, visH0 = swap ? BW : BH;   // 旋轉後的可見長寬
+        const land = visW0 > visH0;
+        const pw = land ? A4H : A4W, ph = land ? A4W : A4H;     // 方向自動:橫式頁→橫式 A4
+        const sc = Math.min(pw / visW0, ph / visH0);            // 等比例縮放,填滿不變形
+        const w = BW * sc, h = BH * sc;
+        const VW = swap ? h : w, VH = swap ? w : h;
+        const left = (pw - VW) / 2, bottom = (ph - VH) / 2;     // 置中
+        let x = left, y = bottom;
+        if (a === 90){ x = left + h; y = bottom; }
+        else if (a === 180){ x = left + w; y = bottom + h; }
+        else if (a === 270){ x = left; y = bottom + w; }
+        const page = out.addPage([pw, ph]);
+        page.drawPage(emb, { x, y, width: w, height: h, rotate: degrees(a) });
+      } catch(err){                                             // 個別頁無法嵌入 → 原尺寸保底
+        console.warn("A4 embed fallback", err);
+        const [pg] = await out.copyPages(src, [srcIdx]);
+        out.addPage(pg);
+      }
+    } else {
+      const [pg] = await out.copyPages(src, [srcIdx]);
+      out.addPage(pg);
+    }
+  }
+  setProgress(95, t("m.out"));
+  const bytes = await out.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  showResult([{ blob, filename: t("f.organize") + ".pdf" }],
+    t("r.organize", { p: orgPages.length, n: used.size }) + " \u00B7 " + fmtSize(blob.size));
 }
 
 /* ---------------- 初始化 ---------------- */
