@@ -964,6 +964,7 @@ const OPTION_BUILDERS = {
         <option value="a4p">${t("o.a4p")}</option>
         <option value="a4l">${t("o.a4l")}</option>
       </select>
+      <button type="button" class="chip" onclick="sortImgFiles()">⇅ ${t("org.sort")}</button>
     </div>`,
   rotate: () => `
     <h4>${t("o.rotTitle")}</h4>
@@ -1240,6 +1241,7 @@ function addFiles(list) {
   if (valid.length < list.length) alert(t("e.skip"));
   if (!cfg.multiple) files = valid.slice(0, 1);
   else files = files.concat(valid);
+  if (currentTool === "img2pdf") sortFilesByName();
   renderFiles();
   renderOptions();
   if (files.length) {
@@ -1290,6 +1292,10 @@ function renderFiles() {
   document.getElementById("runBar").style.display = files.length ? "block" : "none";
 }
 function removeFile(i) { files.splice(i, 1); renderFiles(); renderOptions(); }
+function sortFilesByName() {
+  files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+}
+function sortImgFiles() { sortFilesByName(); renderFiles(); }
 
 /* ---- 通用拖曳排序行為(檔案卡片與頁面縮圖共用) ---- */
 function addDragBehavior(card, container, onDrop) {
