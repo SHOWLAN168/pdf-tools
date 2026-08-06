@@ -41,11 +41,13 @@ header{
 .lang-sel:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
 main{max-width:min(1500px,94vw);margin:0 auto;padding:40px 24px 80px}
 #home{max-width:1080px;margin-inline:auto}
-.hero{text-align:center;margin-bottom:44px}
-.hero h1{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.25}
+.hero{text-align:center;margin-bottom:40px}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;font-size:.76rem;font-weight:500;color:var(--accent-deep);background:var(--accent-soft);border:1px solid #f5d9c6;border-radius:999px;padding:6px 14px;margin-bottom:18px}
+.hero-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(22,101,52,.14)}
+.hero h1{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.22;letter-spacing:.01em}
 .hero h1 span{color:var(--accent)}
-.hero p{margin-top:12px;color:var(--ink-soft);font-size:.95rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.hero p{margin:14px auto 0;color:var(--ink-soft);font-size:.96rem;max-width:560px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
 .cat-tabs{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px}
 .cat-tab{
   font-family:inherit;font-size:.88rem;font-weight:500;cursor:pointer;
@@ -53,21 +55,40 @@ main{max-width:min(1500px,94vw);margin:0 auto;padding:40px 24px 80px}
   border-radius:999px;padding:9px 22px;transition:all .18s ease;
   box-shadow:0 1px 2px rgba(28,25,23,.04);
 }
-.cat-tab:hover{border-color:#d9c9b4;color:var(--ink)}
+.cat-tab:hover{border-color:#d9c9b4;color:var(--ink);transform:translateY(-1px)}
 .cat-tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .tool-card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:22px 20px;cursor:pointer;box-shadow:var(--shadow);
-  transition:transform .18s ease,border-color .18s ease;position:relative;overflow:hidden;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:22px 22px 20px;cursor:pointer;box-shadow:var(--shadow);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;position:relative;overflow:hidden;
+  --cat:var(--accent); --cat-soft:var(--accent-soft);
 }
+.tool-card.cat-organize{--cat:#c2410c;--cat-soft:#fdece1}
+.tool-card.cat-optimize{--cat:#4d7c0f;--cat-soft:#eef3e3}
+.tool-card.cat-convert{--cat:#3557b8;--cat-soft:#e9edf8}
+.tool-card.cat-edit{--cat:#7c3aed;--cat-soft:#f2ecfb}
+.tool-card.cat-secure{--cat:#166534;--cat-soft:#e6f2ea}
 .tool-card::after{
-  content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent);
+  content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--cat);
   transform:scaleY(0);transform-origin:bottom;transition:transform .2s ease;
 }
-.tool-card:hover{transform:translateY(-3px);border-color:#d9c9b4}
+.tool-card:hover{transform:translateY(-4px);border-color:var(--cat);
+  box-shadow:0 2px 4px rgba(28,25,23,.05),0 20px 36px -18px rgba(28,25,23,.30)}
 .tool-card:hover::after{transform:scaleY(1)}
-.tool-ico{font-size:1.7rem;margin-bottom:10px;display:block}
-.tool-card h3{font-size:1.02rem;font-weight:700;margin-bottom:6px}
+.tool-ico{
+  width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;margin-bottom:14px;background:var(--cat-soft);
+  transition:transform .2s ease;
+}
+.tool-card:hover .tool-ico{transform:scale(1.08) rotate(-3deg)}
+.tool-card .go{
+  position:absolute;top:20px;right:18px;width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;
+  color:var(--cat);background:var(--cat-soft);
+  opacity:0;transform:translateX(-5px);transition:opacity .18s ease,transform .18s ease;
+}
+.tool-card:hover .go{opacity:1;transform:translateX(0)}
+.tool-card h3{font-size:1.03rem;font-weight:700;margin-bottom:6px;letter-spacing:.01em}
 .tool-card p{font-size:.8rem;color:var(--ink-soft);line-height:1.55}
 .workspace{display:none}
 .back{
@@ -295,6 +316,7 @@ footer{text-align:center;padding:30px;font-size:.75rem;color:var(--ink-soft);bor
 <main>
   <section id="home">
     <div class="hero">
+      <span class="hero-badge" id="heroBadge"></span>
       <h1 id="heroTitle"></h1>
       <p id="heroSub"></p>
     </div>
@@ -388,7 +410,7 @@ const I18N = {
 "ui.title":"PDF 工坊 — 免費線上 PDF 工具",
 "ui.note":"檔案完全在您的瀏覽器內處理,不會上傳到任何伺服器",
 "ui.heroTitle":"你需要的 <span>PDF 工具</span>,全部在這裡",
-"ui.heroSub":"合併、分割、壓縮、轉換 —— 免安裝、免註冊、免上傳,開啟即用。",
+"ui.heroSub":"合併、分割、壓縮、轉換 —— 免安裝、免註冊、免上傳,開啟即用。","ui.heroBadge":"100% 本機處理 · 檔案不上傳",
 "organize.n":"整理 PDF","organize.d":"合併多份 PDF、拖曳排序、刪除不要的頁,一次搞定。","organize.h":"可加入多份檔案;拖曳縮圖排序,點右上垃圾桶圖示移除頁面,誤刪可從右側垃圾桶回復",
 "org.canvasNote":"拖曳縮圖排序 · 滑過縮圖點右上移入垃圾桶","org.add":"添加文檔","org.local":"本地檔案","org.gdrive":"Google 雲端","org.dropbox":"Dropbox","org.cloudSoon":"雲端匯入功能即將推出,目前請先從本地檔案添加","org.sort":"按名稱排序","org.reset":"全部重置","org.docList":"文檔清單","org.removeDoc":"移除此檔","org.trash":"暫存垃圾桶","org.restore":"回復所選","org.trashEmpty":"刪掉的頁會暫存在這裡,可再選取回復","org.delPage":"移入垃圾桶","org.out":"輸出 PDF →","org.empty":"先添加 PDF 檔案,即可開始整理","org.reading":"讀取檔案中…","org.legend":"左側色條 = 頁面來源","r.organize":"已整理輸出 {p} 頁(來自 {n} 份檔案)","f.organize":"整理","e.orgEmpty":"畫布上沒有頁面,請先添加檔案或從垃圾桶回復頁面",
 "cont.cap":"接著用這份結果繼續(不需重新上傳,選項依檔案型別顯示)",
@@ -428,7 +450,7 @@ const I18N = {
 "o.applyPages":"套用頁面","o.pagesPh":"留空 = 全部頁面;或輸入如 1,3-5",
 "o.delTitle":"刪除設定","o.delLbl":"要刪除的頁","o.delPh":"例:2,4-6",
 "o.extTitle":"擷取設定","o.extLbl":"要保留的頁","o.extPh":"例:1,3-5",
-"o.pnTitle":"頁碼設定","o.pos":"位置","o.bc":"下方置中","o.br":"右下角","o.bl":"左下角","o.fmt":"格式","o.fs":"字級",
+"o.pnTitle":"頁碼設定","o.pos":"位置","o.bc":"下方置中","o.br":"右下角","o.bl":"左下角","o.bo":"底部外側(跨頁)","o.bi":"底部內側(跨頁)","o.pnSpread":"選「跨頁」時頁碼會依單雙頁自動左右對稱(適合冊子;預覽以右頁為例)","o.pnStart":"起始頁","o.pnEnd":"結束頁","o.pnEndPh":"末頁","o.pnStartAt":"頁碼起算","o.pnRangeHint":"封面、目錄、封底可用起始/結束頁排除;「頁碼起算」可讓內文從 1 開始","o.pnNoNum":"此頁不加頁碼","extractsplit.n":"擷取／拆分 PDF","extractsplit.d":"擷取指定頁、依範圍拆分,或每頁各存一檔。","extractsplit.h":"點縮圖或輸入頁碼選取。擷取=合成一份;依範圍拆分=每段一份(ZIP);每頁各存一檔=每頁一份(ZIP)","o.esTitle":"擷取／拆分設定","o.esExtract":"擷取指定頁","o.esRange":"依範圍拆分","o.esEvery":"每頁各存一檔","ui.noteEvery":"📄 每頁各存一檔:每一頁都會輸出成獨立的 PDF(打包成 ZIP),不需選取","o.fmt":"格式","o.fs":"字級",
 "o.cropTitle":"裁剪設定(由各邊向內裁切,單位:mm)","o.top":"上邊","o.bottom":"下邊","o.left":"左邊","o.right":"右邊",
 "o.wmTitle":"浮水印設定","o.type":"類型","o.text":"文字","o.image":"圖片 / Logo","o.wmPh":"支援任何語言,例:內部資料 / CONFIDENTIAL","o.wmDefault":"機密文件",
 "o.color":"顏色","o.black":"黑","o.white":"白","o.custom":"自訂顏色","o.gray":"灰","o.red":"紅","o.blue":"藍","o.green":"綠",
@@ -478,7 +500,7 @@ const I18N = {
 "ui.title":"PDF 工坊 — 免费在线 PDF 工具",
 "ui.note":"文件完全在您的浏览器内处理,不会上传到任何服务器",
 "ui.heroTitle":"你需要的 <span>PDF 工具</span>,全部在这里",
-"ui.heroSub":"合并、拆分、压缩、转换 —— 免安装、免注册、免上传,打开即用。",
+"ui.heroSub":"合并、拆分、压缩、转换 —— 免安装、免注册、免上传,打开即用。","ui.heroBadge":"100% 本机处理 · 文件不上传",
 "organize.n":"整理 PDF","organize.d":"合并多份 PDF、拖拽排序、删除不要的页,一次搞定。","organize.h":"可加入多份文件;拖拽缩略图排序,点右上回收站图标移除页面,误删可从右侧回收站恢复",
 "org.canvasNote":"拖拽缩略图排序 · 划过缩略图点右上移入回收站","org.add":"添加文档","org.local":"本地文件","org.gdrive":"Google 云端","org.dropbox":"Dropbox","org.cloudSoon":"云端导入功能即将推出,目前请先从本地文件添加","org.sort":"按名称排序","org.reset":"全部重置","org.docList":"文档清单","org.removeDoc":"移除此文件","org.trash":"暂存回收站","org.restore":"恢复所选","org.trashEmpty":"删掉的页会暂存在这里,可再选取恢复","org.delPage":"移入回收站","org.out":"输出 PDF →","org.empty":"先添加 PDF 文件,即可开始整理","org.reading":"读取文件中…","org.legend":"左侧色条 = 页面来源","r.organize":"已整理输出 {p} 页(来自 {n} 份文件)","f.organize":"整理","e.orgEmpty":"画布上没有页面,请先添加文件或从回收站恢复页面",
 "cont.cap":"接着用这份结果继续(无需重新上传,选项依文件类型显示)",
@@ -518,7 +540,7 @@ const I18N = {
 "o.applyPages":"应用页面","o.pagesPh":"留空 = 全部页面;或输入如 1,3-5",
 "o.delTitle":"删除设置","o.delLbl":"要删除的页","o.delPh":"例:2,4-6",
 "o.extTitle":"提取设置","o.extLbl":"要保留的页","o.extPh":"例:1,3-5",
-"o.pnTitle":"页码设置","o.pos":"位置","o.bc":"下方居中","o.br":"右下角","o.bl":"左下角","o.fmt":"格式","o.fs":"字号",
+"o.pnTitle":"页码设置","o.pos":"位置","o.bc":"下方居中","o.br":"右下角","o.bl":"左下角","o.bo":"底部外侧(跨页)","o.bi":"底部内侧(跨页)","o.pnSpread":"选「跨页」时页码会依单双页自动左右对称(适合册子;预览以右页为例)","o.pnStart":"起始页","o.pnEnd":"结束页","o.pnEndPh":"末页","o.pnStartAt":"页码起算","o.pnRangeHint":"封面、目录、封底可用起始/结束页排除;「页码起算」可让正文从 1 开始","o.pnNoNum":"此页不加页码","extractsplit.n":"提取／拆分 PDF","extractsplit.d":"提取指定页、按范围拆分,或每页各存一档。","extractsplit.h":"点缩略图或输入页码选取。提取=合成一份;按范围拆分=每段一份(ZIP);每页各存一档=每页一份(ZIP)","o.esTitle":"提取／拆分设置","o.esExtract":"提取指定页","o.esRange":"按范围拆分","o.esEvery":"每页各存一档","ui.noteEvery":"📄 每页各存一档:每一页都会输出成独立的 PDF(打包成 ZIP),无需选取","o.fmt":"格式","o.fs":"字号",
 "o.cropTitle":"裁剪设置(由各边向内裁切,单位:mm)","o.top":"上边","o.bottom":"下边","o.left":"左边","o.right":"右边",
 "o.wmTitle":"水印设置","o.type":"类型","o.text":"文字","o.image":"图片 / Logo","o.wmPh":"支持任何语言,例:内部资料 / CONFIDENTIAL","o.wmDefault":"机密文件",
 "o.color":"颜色","o.black":"黑","o.white":"白","o.custom":"自定义颜色","o.gray":"灰","o.red":"红","o.blue":"蓝","o.green":"绿",
@@ -568,7 +590,7 @@ const I18N = {
 "ui.title":"PDF Workshop — Free Online PDF Tools",
 "ui.note":"Files are processed entirely in your browser — nothing is uploaded",
 "ui.heroTitle":"Every <span>PDF tool</span> you need, in one place",
-"ui.heroSub":"Merge, split, compress, convert — no install, no sign-up, no upload.",
+"ui.heroSub":"Merge, split, compress, convert — no install, no sign-up, no upload.","ui.heroBadge":"100% on-device · nothing uploaded",
 "organize.n":"Organize PDF","organize.d":"Merge PDFs, drag to reorder, and delete pages — all on one canvas.","organize.h":"Add multiple files; drag thumbnails to reorder, click the bin icon to trash a page, and restore from the trash on the right",
 "org.canvasNote":"Drag thumbnails to reorder · hover a page and click the bin to trash it","org.add":"Add files","org.local":"Local files","org.gdrive":"Google Drive","org.dropbox":"Dropbox","org.cloudSoon":"Cloud import is coming soon — for now please add local files","org.sort":"Sort by name","org.reset":"Reset all","org.docList":"Documents","org.removeDoc":"Remove this file","org.trash":"Trash","org.restore":"Restore selected","org.trashEmpty":"Deleted pages are kept here — select and restore anytime","org.delPage":"Move to trash","org.out":"Export PDF →","org.empty":"Add PDF files to start organizing","org.reading":"Reading files…","org.legend":"Left color bar = source file","r.organize":"Organized {p} pages from {n} file(s)","f.organize":"organized","e.orgEmpty":"No pages on the canvas — add files or restore pages from the trash",
 "cont.cap":"Keep going with this result — no re-upload needed",
@@ -608,7 +630,7 @@ const I18N = {
 "o.applyPages":"Apply to pages","o.pagesPh":"Empty = all pages; or e.g. 1,3-5",
 "o.delTitle":"Delete settings","o.delLbl":"Pages to delete","o.delPh":"e.g. 2,4-6",
 "o.extTitle":"Extract settings","o.extLbl":"Pages to keep","o.extPh":"e.g. 1,3-5",
-"o.pnTitle":"Page number settings","o.pos":"Position","o.bc":"Bottom center","o.br":"Bottom right","o.bl":"Bottom left","o.fmt":"Format","o.fs":"Font size",
+"o.pnTitle":"Page number settings","o.pos":"Position","o.bc":"Bottom center","o.br":"Bottom right","o.bl":"Bottom left","o.bo":"Bottom outer (spread)","o.bi":"Bottom inner (spread)","o.pnSpread":"Spread modes mirror left/right by odd/even pages (for booklets; preview shows a right page)","o.pnStart":"Start page","o.pnEnd":"End page","o.pnEndPh":"last","o.pnStartAt":"Start at","o.pnRangeHint":"Use start/end page to skip cover, contents and back cover; Start-at lets the body begin at 1","o.pnNoNum":"No number on this page","extractsplit.n":"Extract / Split PDF","extractsplit.d":"Extract specific pages, split by ranges, or one file per page.","extractsplit.h":"Click thumbnails or type page numbers. Extract = one file; Split by range = one file per segment (ZIP); Every page = one file per page (ZIP)","o.esTitle":"Extract / Split settings","o.esExtract":"Extract pages","o.esRange":"Split by range","o.esEvery":"One file per page","ui.noteEvery":"📄 One file per page: every page becomes its own PDF (zipped) — no selection needed","o.fmt":"Format","o.fs":"Font size",
 "o.cropTitle":"Crop margins (from each edge, in mm)","o.top":"Top","o.bottom":"Bottom","o.left":"Left","o.right":"Right",
 "o.wmTitle":"Watermark settings","o.type":"Type","o.text":"Text","o.image":"Image / Logo","o.wmPh":"Any language, e.g. CONFIDENTIAL","o.wmDefault":"CONFIDENTIAL",
 "o.color":"Color","o.black":"Black","o.white":"White","o.custom":"Custom color","o.gray":"Gray","o.red":"Red","o.blue":"Blue","o.green":"Green",
@@ -658,7 +680,7 @@ const I18N = {
 "ui.title":"PDF工房 — 無料オンラインPDFツール",
 "ui.note":"ファイルはブラウザ内で処理され、サーバーには一切送信されません",
 "ui.heroTitle":"必要な<span>PDFツール</span>が、すべてここに",
-"ui.heroSub":"結合・分割・圧縮・変換 — インストール不要、登録不要、アップロード不要。",
+"ui.heroSub":"結合・分割・圧縮・変換 — インストール不要、登録不要、アップロード不要。","ui.heroBadge":"100% 端末内で処理 · アップロードなし",
 "organize.n":"PDF 整理","organize.d":"複数の PDF を結合し、ドラッグで並べ替え、不要なページを削除。","organize.h":"複数ファイルを追加できます。サムネイルをドラッグして並べ替え、右上のゴミ箱でページを削除、右側のゴミ箱から復元も可能",
 "org.canvasNote":"サムネイルをドラッグして並べ替え · 右上のゴミ箱で削除","org.add":"ファイル追加","org.local":"ローカル","org.gdrive":"Google ドライブ","org.dropbox":"Dropbox","org.cloudSoon":"クラウド取り込みは近日対応。今はローカルから追加してください","org.sort":"名前で並べ替え","org.reset":"すべてリセット","org.docList":"ドキュメント","org.removeDoc":"このファイルを削除","org.trash":"ゴミ箱","org.restore":"選択を復元","org.trashEmpty":"削除したページはここに保管。選んで復元できます","org.delPage":"ゴミ箱へ","org.out":"PDF を書き出す →","org.empty":"PDF ファイルを追加すると整理を開始できます","org.reading":"ファイルを読み込み中…","org.legend":"左の色帯 = ページの出所","r.organize":"{n} 個のファイルから {p} ページを整理しました","f.organize":"整理","e.orgEmpty":"キャンバスにページがありません。ファイルを追加するかゴミ箱から復元してください",
 "cont.cap":"この結果を使って続ける(再アップロード不要)",
@@ -698,7 +720,7 @@ const I18N = {
 "o.applyPages":"対象ページ","o.pagesPh":"空欄=全ページ。例:1,3-5",
 "o.delTitle":"削除設定","o.delLbl":"削除するページ","o.delPh":"例:2,4-6",
 "o.extTitle":"抽出設定","o.extLbl":"残すページ","o.extPh":"例:1,3-5",
-"o.pnTitle":"ページ番号設定","o.pos":"位置","o.bc":"下部中央","o.br":"右下","o.bl":"左下","o.fmt":"形式","o.fs":"サイズ",
+"o.pnTitle":"ページ番号設定","o.pos":"位置","o.bc":"下部中央","o.br":"右下","o.bl":"左下","o.bo":"下部・外側(見開き)","o.bi":"下部・内側(見開き)","o.pnSpread":"見開きは奇数/偶数ページで左右反転します(冊子向け;プレビューは右ページ)","o.pnStart":"開始ページ","o.pnEnd":"終了ページ","o.pnEndPh":"最終","o.pnStartAt":"番号開始","o.pnRangeHint":"表紙・目次・裏表紙は開始/終了ページで除外可;番号開始で本文を 1 から始められます","o.pnNoNum":"このページは番号なし","extractsplit.n":"抽出・分割 PDF","extractsplit.d":"指定ページの抽出、範囲での分割、または1ページずつ保存。","extractsplit.h":"サムネイルをクリックまたはページ番号を入力。抽出=1ファイル;範囲で分割=区間ごとに1ファイル(ZIP);1ページずつ=各ページ1ファイル(ZIP)","o.esTitle":"抽出・分割の設定","o.esExtract":"ページ抽出","o.esRange":"範囲で分割","o.esEvery":"1ページずつ保存","ui.noteEvery":"📄 1ページずつ保存:各ページが個別の PDF(ZIP)になります。選択は不要です","o.fmt":"形式","o.fs":"サイズ",
 "o.cropTitle":"トリミング(各辺から内側へ、単位:mm)","o.top":"上","o.bottom":"下","o.left":"左","o.right":"右",
 "o.wmTitle":"透かし設定","o.type":"種類","o.text":"テキスト","o.image":"画像 / ロゴ","o.wmPh":"任意の言語、例:社外秘 / CONFIDENTIAL","o.wmDefault":"社外秘",
 "o.color":"色","o.black":"黒","o.white":"白","o.custom":"カスタム色","o.gray":"グレー","o.red":"赤","o.blue":"青","o.green":"緑",
@@ -748,7 +770,7 @@ const I18N = {
 "ui.title":"PDF 워크숍 — 무료 온라인 PDF 도구",
 "ui.note":"파일은 브라우저에서만 처리되며 서버로 전송되지 않습니다",
 "ui.heroTitle":"필요한 <span>PDF 도구</span>, 모두 여기에",
-"ui.heroSub":"병합·분할·압축·변환 — 설치, 가입, 업로드 없이 바로 사용.",
+"ui.heroSub":"병합·분할·압축·변환 — 설치, 가입, 업로드 없이 바로 사용.","ui.heroBadge":"100% 기기 내 처리 · 업로드 없음",
 "organize.n":"PDF 정리","organize.d":"여러 PDF 를 병합하고 드래그로 순서를 바꾸고 페이지를 삭제 — 한 화면에서.","organize.h":"여러 파일을 추가할 수 있습니다. 썸네일을 드래그해 순서를 바꾸고, 오른쪽 위 휴지통으로 페이지를 삭제하며, 오른쪽 휴지통에서 복원할 수 있습니다",
 "org.canvasNote":"썸네일을 드래그해 정렬 · 오른쪽 위 휴지통으로 삭제","org.add":"파일 추가","org.local":"로컬 파일","org.gdrive":"Google 드라이브","org.dropbox":"Dropbox","org.cloudSoon":"클라우드 가져오기는 곧 지원됩니다. 지금은 로컬 파일로 추가해 주세요","org.sort":"이름순 정렬","org.reset":"전체 초기화","org.docList":"문서 목록","org.removeDoc":"이 파일 제거","org.trash":"임시 휴지통","org.restore":"선택 복원","org.trashEmpty":"삭제한 페이지는 여기 보관됩니다. 선택해 복원하세요","org.delPage":"휴지통으로","org.out":"PDF 내보내기 →","org.empty":"PDF 파일을 추가하면 정리를 시작할 수 있습니다","org.reading":"파일 읽는 중…","org.legend":"왼쪽 색 막대 = 페이지 출처","r.organize":"{n}개 파일에서 {p}페이지를 정리했습니다","f.organize":"정리","e.orgEmpty":"캔버스에 페이지가 없습니다. 파일을 추가하거나 휴지통에서 복원하세요",
 "cont.cap":"이 결과로 계속 작업(다시 업로드 불필요)",
@@ -788,7 +810,7 @@ const I18N = {
 "o.applyPages":"적용 페이지","o.pagesPh":"비우면 전체. 예: 1,3-5",
 "o.delTitle":"삭제 설정","o.delLbl":"삭제할 페이지","o.delPh":"예: 2,4-6",
 "o.extTitle":"추출 설정","o.extLbl":"남길 페이지","o.extPh":"예: 1,3-5",
-"o.pnTitle":"페이지 번호 설정","o.pos":"위치","o.bc":"하단 가운데","o.br":"오른쪽 아래","o.bl":"왼쪽 아래","o.fmt":"형식","o.fs":"크기",
+"o.pnTitle":"페이지 번호 설정","o.pos":"위치","o.bc":"하단 가운데","o.br":"오른쪽 아래","o.bl":"왼쪽 아래","o.bo":"하단 바깥쪽(펼침)","o.bi":"하단 안쪽(펼침)","o.pnSpread":"펼침 모드는 홀/짝 페이지에 따라 좌우가 바뀝니다(책자용; 미리보기는 오른쪽 페이지)","o.pnStart":"시작 페이지","o.pnEnd":"종료 페이지","o.pnEndPh":"마지막","o.pnStartAt":"시작 번호","o.pnRangeHint":"표지·목차·뒤표지는 시작/종료 페이지로 제외; 시작 번호로 본문을 1부터 시작","o.pnNoNum":"이 페이지는 번호 없음","extractsplit.n":"추출·분할 PDF","extractsplit.d":"지정 페이지 추출, 범위로 분할, 또는 페이지별 저장.","extractsplit.h":"썸네일을 클릭하거나 페이지 번호를 입력하세요. 추출=한 파일; 범위 분할=구간별 한 파일(ZIP); 페이지별=각 페이지 한 파일(ZIP)","o.esTitle":"추출·분할 설정","o.esExtract":"페이지 추출","o.esRange":"범위로 분할","o.esEvery":"페이지별 저장","ui.noteEvery":"📄 페이지별 저장: 각 페이지가 개별 PDF(ZIP)로 저장됩니다. 선택할 필요 없습니다","o.fmt":"형식","o.fs":"크기",
 "o.cropTitle":"자르기(각 가장자리 기준, 단위: mm)","o.top":"위","o.bottom":"아래","o.left":"왼쪽","o.right":"오른쪽",
 "o.wmTitle":"워터마크 설정","o.type":"유형","o.text":"텍스트","o.image":"이미지 / 로고","o.wmPh":"모든 언어 가능, 예: 대외비 / CONFIDENTIAL","o.wmDefault":"대외비",
 "o.color":"색상","o.black":"검정","o.white":"흰색","o.custom":"사용자 지정","o.gray":"회색","o.red":"빨강","o.blue":"파랑","o.green":"초록",
@@ -880,6 +902,7 @@ function applyStatic() {
   document.getElementById("headerNote").textContent = t("ui.note");
   document.getElementById("heroTitle").innerHTML = t("ui.heroTitle");
   document.getElementById("heroSub").textContent = t("ui.heroSub");
+  document.getElementById("heroBadge").textContent = t("ui.heroBadge");
   document.getElementById("btnBack").textContent = t("ui.back");
   document.getElementById("dzText").textContent = t("ui.dzClick");
   document.getElementById("gridNote").textContent = t("ui.gridNote");
@@ -892,8 +915,7 @@ function applyStatic() {
 /* ---------------- 工具定義(結構欄位;文字皆走 i18n) ---------------- */
 const TOOLS = {
   organize:{ cat:"organize", ico:"🗂️", accept:".pdf", multiple:true },
-  split:   { cat:"organize", ico:"✂️", accept:".pdf", multiple:false },
-  extract: { cat:"organize", ico:"📑", accept:".pdf", multiple:false },
+  extractsplit:{ cat:"organize", ico:"✂️", accept:".pdf", multiple:false },
   compress:{ cat:"optimize", ico:"🗜️", accept:".pdf", multiple:false },
   repair:  { cat:"optimize", ico:"🛠️", accept:".pdf", multiple:false },
   pdf2jpg: { cat:"convert",  ico:"🖼️", accept:".pdf", multiple:false },
@@ -969,6 +991,17 @@ const OPTION_BUILDERS = {
       <label>${t("o.extLbl")}</label>
       <input type="text" id="extractPages" placeholder="${t("o.extPh")}">
     </div>`,
+  extractsplit: () => `
+    <h4>${t("o.esTitle")}</h4>
+    <div class="opt-row"><div class="chip-group">
+      <button class="chip ${chipState.esMode==="extract"?"on":""}" data-mode="extract" onclick="pickEsMode(this,'extract')">${t("o.esExtract")}</button>
+      <button class="chip ${chipState.esMode==="range"?"on":""}" data-mode="range" onclick="pickEsMode(this,'range')">${t("o.esRange")}</button>
+      <button class="chip ${chipState.esMode==="every"?"on":""}" data-mode="every" onclick="pickEsMode(this,'every')">${t("o.esEvery")}</button>
+    </div></div>
+    <div class="opt-row" id="esRangeRow">
+      <label id="esRangeLbl">${chipState.esMode==="extract"?t("o.extLbl"):t("o.rangeLbl")}</label>
+      <input type="text" id="esRanges" placeholder="${chipState.esMode==="extract"?t("o.extPh"):t("o.rangePh")}">
+    </div>`,
   pagenum: () => `
     <h4>${t("o.pnTitle")}</h4>
     <div class="opt-row">
@@ -977,6 +1010,8 @@ const OPTION_BUILDERS = {
         <option value="bc">${t("o.bc")}</option>
         <option value="br">${t("o.br")}</option>
         <option value="bl">${t("o.bl")}</option>
+        <option value="bo">${t("o.bo")}</option>
+        <option value="bi">${t("o.bi")}</option>
       </select>
       <label>${t("o.fmt")}</label>
       <select id="pnFmt">
@@ -987,6 +1022,13 @@ const OPTION_BUILDERS = {
       <label>${t("o.fs")}</label>
       <input type="number" id="pnSize" value="11" min="6" max="36" style="min-width:80px">
     </div>
+    <div style="font-size:.76rem;color:var(--ink-soft);margin:-2px 0 2px">${t("o.pnSpread")}</div>
+    <div class="opt-row">
+      <label>${t("o.pnStart")}</label><input type="number" id="pnStart" value="1" min="1" style="min-width:70px">
+      <label>${t("o.pnEnd")}</label><input type="number" id="pnEnd" placeholder="${t("o.pnEndPh")}" min="1" style="min-width:70px">
+      <label>${t("o.pnStartAt")}</label><input type="number" id="pnStartNum" value="1" style="min-width:70px">
+    </div>
+    <div style="font-size:.76rem;color:var(--ink-soft);margin:-2px 0 2px">${t("o.pnRangeHint")}</div>
     <div class="opt-row">
       <label>${t("o.color")}</label>
       <div class="swatches">
@@ -1084,7 +1126,7 @@ const OPTION_BUILDERS = {
 let currentTool = null;
 let currentCat = "all";
 let files = [];
-let chipState = { splitMode:"range", compressLevel:"mid", jpgScale:"2", rotateDeg:"90", wmType:"text", lockMode:"open" };
+let chipState = { splitMode:"range", esMode:"extract", compressLevel:"mid", jpgScale:"2", rotateDeg:"90", wmType:"text", lockMode:"open" };
 let downloads = [];
 let lastMeta = null, lastRemind = null;
 let pageOrder = [];
@@ -1096,11 +1138,11 @@ let previewBase = null;           // 浮水印/頁碼預覽的第一頁底圖
 let wmLogoImg = null;
 let pvTimer = null;
 const PREVIEW_TOOLS = ["watermark", "pagenum"];
-const SELECT_TOOLS = ["split", "delete", "extract"];
+const SELECT_TOOLS = ["extractsplit"];
 let orgDocs = [], orgPages = [], orgTrash = [], orgSel = new Set(), orgSeq = 0;
 const ORG_COLORS = ["#c2410c","#1d4ed8","#166534","#7c3aed","#0891b2","#b45309","#be123c","#4d7c0f"];
 let lastResultFile = null;
-const CONTINUE_PDF = ["organize","pagenum","watermark","compress","rotate","crop","extract","split","pdf2jpg","protect"];
+const CONTINUE_PDF = ["organize","pagenum","watermark","compress","rotate","crop","extractsplit","pdf2jpg","protect"];
 let orgForceA4 = true;
 
 /* ---------------- 首頁:分類標籤 + 工具卡片 ---------------- */
@@ -1121,8 +1163,8 @@ function renderToolGrid() {
   for (const [key, cfg] of Object.entries(TOOLS)) {
     if (currentCat !== "all" && cfg.cat !== currentCat) continue;
     const card = document.createElement("div");
-    card.className = "tool-card";
-    card.innerHTML = `<span class="tool-ico">${cfg.ico}</span><h3>${t(key + ".n")}</h3><p>${t(key + ".d")}</p>`;
+    card.className = "tool-card cat-" + cfg.cat;
+    card.innerHTML = `<span class="go">→</span><span class="tool-ico">${cfg.ico}</span><h3>${t(key + ".n")}</h3><p>${t(key + ".d")}</p>`;
     card.onclick = () => openTool(key);
     grid.appendChild(card);
   }
@@ -1380,6 +1422,8 @@ function renderOptions() {
     box.style.display = "block";
     const rr = document.getElementById("splitRangeRow");
     if (rr) rr.style.display = chipState.splitMode === "range" ? "flex" : "none";
+    const er = document.getElementById("esRangeRow");
+    if (er) er.style.display = chipState.esMode === "every" ? "none" : "flex";
     if (currentTool === "watermark") toggleWmRows();
     if (currentTool === "protect") toggleLockHint();
     if (SELECT_TOOLS.includes(currentTool) && pageThumbs.length) syncSelToInput();
@@ -1396,6 +1440,15 @@ function pickChip(btn, key) {
   const rr = document.getElementById("splitRangeRow");
   if (rr) rr.style.display = chipState.splitMode === "range" ? "flex" : "none";
   if (PREVIEW_TOOLS.includes(currentTool)) schedulePreview();
+}
+
+function pickEsMode(btn, mode) {
+  chipState.esMode = mode;
+  selPages = new Set();
+  renderOptions();
+  if (pageThumbs.length) renderSelectGrid();
+  const gn = document.getElementById("gridNote");
+  if (gn && pageThumbs.length) gn.textContent = t(noteKeyFor(currentTool));
 }
 
 /* ---- 頁碼顏色:固定色塊 + 自由色盤(#pnColor 為唯一資料來源) ---- */
@@ -1589,6 +1642,7 @@ async function runTool() {
     setProgress(5, t("m.read"));
     switch (currentTool) {
       case "organize":  await doOrganize(); break;
+      case "extractsplit": await doExtractSplit(); break;
       case "merge":     await doMerge(); break;
       case "reorder":   await doReorder(); break;
       case "split":     await doSplit(); break;
@@ -1616,6 +1670,9 @@ async function runTool() {
 
 /* ---------------- 頁面排序:縮圖 + 拖曳 ---------------- */
 function noteKeyFor(tool) {
+  if (tool === "extractsplit")
+    return chipState.esMode === "range" ? "ui.noteSplit"
+         : chipState.esMode === "every" ? "ui.noteEvery" : "ui.noteExt";
   return tool === "delete" ? "ui.noteDel"
        : tool === "extract" ? "ui.noteExt"
        : tool === "split" ? "ui.noteSplit" : "ui.gridNote";
@@ -1703,7 +1760,7 @@ function nudgePage(pos, dir) {
 function renderSelectGrid() {
   const gridEl = document.getElementById("pageGrid");
   gridEl.innerHTML = "";
-  const mode = currentTool;
+  const mode = selBehavior();
   const last = pageThumbs.length - 1;
   pageThumbs.forEach((th, idx) => {
     const card = document.createElement("div");
@@ -1718,7 +1775,7 @@ function renderSelectGrid() {
       <span class="pnum">${idx + 1}</span>
       <img src="${th}" alt="p${idx + 1}">
       ${mark ? `<span class="mark">${mark}</span>` : ""}`;
-    if (!(mode === "split" && idx === last)) { // 最後一頁之後無可分割
+    if (mode !== null && !(mode === "split" && idx === last)) { // 每頁模式不可點;分割最後一頁之後無可分割
       card.onclick = () => {
         if (selPages.has(idx)) selPages.delete(idx);
         else selPages.add(idx);
@@ -1752,21 +1809,33 @@ function splitSegmentsString() {
   segs.push([start, n - 1]);
   return segs.map(([a, b]) => a === b ? `${a + 1}` : `${a + 1}-${b + 1}`).join(",");
 }
+function selBehavior() {
+  if (currentTool === "delete") return "delete";
+  if (currentTool === "extract") return "extract";
+  if (currentTool === "split") return "split";
+  if (currentTool === "extractsplit") return chipState.esMode === "range" ? "split" : chipState.esMode === "every" ? null : "extract";
+  return null;
+}
 function selInputId() {
   return currentTool === "delete" ? "deletePages"
-       : currentTool === "extract" ? "extractPages" : "splitRanges";
+       : currentTool === "extract" ? "extractPages"
+       : currentTool === "extractsplit" ? "esRanges" : "splitRanges";
 }
 function syncSelToInput() {
+  const beh = selBehavior();
+  if (beh === null) return;                       // 每頁模式無輸入
   const inp = document.getElementById(selInputId());
   if (!inp) return;
-  if (currentTool === "split") inp.value = pageThumbs.length ? splitSegmentsString() : "";
+  if (beh === "split") inp.value = pageThumbs.length ? splitSegmentsString() : "";
   else inp.value = formatRanges([...selPages].sort((x, y) => x - y));
 }
 function syncSelFromInput() {
+  const beh = selBehavior();
+  if (beh === null) return;
   const inp = document.getElementById(selInputId());
   if (!inp || !pageThumbs.length) return;
   try {
-    if (currentTool === "split") {
+    if (beh === "split") {
       const groups = parseRangeGroups(inp.value, pageThumbs.length);
       const ends = groups.map(g => g[g.length - 1]).filter(e => e < pageThumbs.length - 1);
       selPages = new Set(ends);
@@ -1827,12 +1896,29 @@ function updatePreview() {
       const size = Math.max(6, Math.min(36, parseInt(sizeEl.value) || 11));
       const pos = document.getElementById("pnPos").value;
       const fmt = document.getElementById("pnFmt").value;
-      const label = fmt === "slash" ? `1 / ${base.numPages}` : fmt === "dash" ? "- 1 -" : "1";
-      ctx.font = `${size * scl}px Helvetica, Arial, sans-serif`;
-      ctx.fillStyle = (document.getElementById("pnColor") || {}).value || "#000000";
-      const tw = ctx.measureText(label).width;
-      const x = pos === "bc" ? (pv.width - tw) / 2 : pos === "br" ? pv.width - tw - 36 * scl : 36 * scl;
-      ctx.fillText(label, x, pv.height - 24 * scl);
+      const sP = Math.max(1, parseInt((document.getElementById("pnStart") || {}).value) || 1);
+      const eRaw = parseInt((document.getElementById("pnEnd") || {}).value);
+      const eP = eRaw ? Math.max(sP, eRaw) : base.numPages;
+      const snR = parseInt((document.getElementById("pnStartNum") || {}).value);
+      const sAt = Number.isFinite(snR) ? snR : 1;
+      if (1 >= sP && 1 <= eP) {
+        const num = sAt + (1 - sP), lastN = sAt + (eP - sP);
+        const label = fmt === "slash" ? `${num} / ${lastN}` : fmt === "dash" ? `- ${num} -` : `${num}`;
+        ctx.font = `${size * scl}px Helvetica, Arial, sans-serif`;
+        ctx.fillStyle = (document.getElementById("pnColor") || {}).value || "#000000";
+        const tw = ctx.measureText(label).width;
+        let pside = pos;
+        if (pos === "bo") pside = "br";        // 預覽第 1 頁為右頁 → 右下
+        else if (pos === "bi") pside = "bl";
+        const x = pside === "bc" ? (pv.width - tw) / 2 : pside === "br" ? pv.width - tw - 36 * scl : 36 * scl;
+        ctx.fillText(label, x, pv.height - 24 * scl);
+      } else {
+        ctx.font = `${13 * scl}px sans-serif`;
+        ctx.fillStyle = "rgba(140,140,140,.95)";
+        const note = t("o.pnNoNum");
+        const tw = ctx.measureText(note).width;
+        ctx.fillText(note, (pv.width - tw) / 2, pv.height - 20 * scl);
+      }
     }
   } else {
     // 浮水印預覽:重現 drawWmOnPage 的置中/平鋪與旋轉(canvas y 軸向下,角度取負)
@@ -2132,6 +2218,44 @@ async function doExtract() {
   showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.ext") + ".pdf" }], () => (t("r.ext", { n: sel.length }) + " · " + fmtSize(blob.size)));
 }
 
+/* ---------------- 擷取／拆分(擷取指定頁 + 依範圍拆分 + 每頁各存一檔) ---------------- */
+async function doExtractSplit() {
+  const m = chipState.esMode || "extract";
+  const srcBytes = await readBuf(files[0]);
+  const src = await loadPdfFromBytes(srcBytes, files[0].name);
+  const total = src.getPageCount();
+  const name = baseName(files[0].name);
+  if (m === "extract") {
+    const sel = parsePages(document.getElementById("esRanges").value, total);
+    if (!sel) throw new Error(t("e.extNeed"));
+    setProgress(60, t("m.out"));
+    const bytes = await buildSubsetPdf(src, srcBytes, sel);
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    showResult([{ blob, filename: name + "_" + t("f.ext") + ".pdf" }], () => (t("r.ext", { n: sel.length }) + " · " + fmtSize(blob.size)));
+    return;
+  }
+  const groups = (m === "every")
+    ? Array.from({ length: total }, (_, i) => [i])
+    : parseRangeGroups(document.getElementById("esRanges").value, total);
+  const items = [];
+  for (let g = 0; g < groups.length; g++) {
+    setProgress(10 + (g / groups.length) * 80, t("m.split", { i: g + 1, n: groups.length }));
+    const bytes = await buildSubsetPdf(src, srcBytes, groups[g]);
+    const gp = groups[g];
+    const label = gp.length === 1 ? t("f.page", { n: gp[0] + 1 }) : t("f.pages", { a: gp[0] + 1, b: gp[gp.length - 1] + 1 });
+    items.push({ blob: new Blob([bytes], { type: "application/pdf" }), filename: `${name}_${label}.pdf` });
+  }
+  if (items.length === 1) {
+    showResult(items, () => (t("r.split1", { n: total })));
+  } else {
+    setProgress(95, t("m.zip"));
+    const zip = new JSZip();
+    items.forEach(it => zip.file(it.filename, it.blob));
+    const zblob = await zip.generateAsync({ type: "blob" });
+    showResult([{ blob: zblob, filename: `${name}_${t("f.splitZip")}.zip` }], () => (t("r.splitN", { n: items.length }) + " · " + fmtSize(zblob.size)));
+  }
+}
+
 /* ---------------- 頁碼 ---------------- */
 async function doPageNum() {
   const doc = await loadWithPdfLib(files[0]);
@@ -2146,17 +2270,31 @@ async function doPageNum() {
     parseInt(hex.slice(5, 7), 16) / 255
   );
   const total = doc.getPageCount();
+  const clampN = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const startPage = clampN(parseInt(document.getElementById("pnStart").value) || 1, 1, total);
+  const endRaw = parseInt(document.getElementById("pnEnd").value);
+  const endPage = endRaw ? clampN(endRaw, startPage, total) : total;
+  const snRaw = parseInt(document.getElementById("pnStartNum").value);
+  const startAt = Number.isFinite(snRaw) ? snRaw : 1;
+  const lastNum = startAt + (endPage - startPage);
+  const numbered = endPage - startPage + 1;
   doc.getPages().forEach((p, i) => {
-    const label = fmt === "slash" ? `${i + 1} / ${total}` : fmt === "dash" ? `- ${i + 1} -` : `${i + 1}`;
+    const phys = i + 1;
+    if (phys < startPage || phys > endPage) return;               // 封面/目錄/封底等不編號
+    const num = startAt + (phys - startPage);
+    const label = fmt === "slash" ? `${num} / ${lastNum}` : fmt === "dash" ? `- ${num} -` : `${num}`;
     const { width } = p.getSize();
     const tw = font.widthOfTextAtSize(label, size);
-    const x = pos === "bc" ? (width - tw) / 2 : pos === "br" ? width - tw - 36 : 36;
+    let side = pos;
+    if (pos === "bo") side = (i % 2 === 0) ? "br" : "bl";        // 外側:單數頁(右頁)右下、雙數頁(左頁)左下
+    else if (pos === "bi") side = (i % 2 === 0) ? "bl" : "br";   // 內側:相反
+    const x = side === "bc" ? (width - tw) / 2 : side === "br" ? width - tw - 36 : 36;
     p.drawText(label, { x, y: 24, size, font, color: col });
   });
   setProgress(90, t("m.out"));
   const bytes = await doc.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.pn") + ".pdf" }], () => (t("r.pn", { n: total }) + " · " + fmtSize(blob.size)));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.pn") + ".pdf" }], () => (t("r.pn", { n: numbered }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 浮水印(文字任何語言 / Logo 圖片) ---------------- */
