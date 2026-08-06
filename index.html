@@ -865,7 +865,7 @@ function setLang(l) {
     renderFiles();
     renderOptions();
     if (currentTool === "organize") renderOrganize();
-    if (document.getElementById("resultBox").style.display === "block" && downloads.length) renderContinueBar(downloads);
+    if (document.getElementById("resultBox").style.display === "block" && downloads.length) renderResultBody();
     if (pageThumbs.length) {
       document.getElementById("gridNote").textContent = t(noteKeyFor(currentTool));
       if (currentTool === "reorder") renderPageGrid();
@@ -1086,6 +1086,7 @@ let currentCat = "all";
 let files = [];
 let chipState = { splitMode:"range", compressLevel:"mid", jpgScale:"2", rotateDeg:"90", wmType:"text", lockMode:"open" };
 let downloads = [];
+let lastMeta = null, lastRemind = null;
 let pageOrder = [];
 let pageThumbs = [];
 const fileThumbMap = new Map();   // 以 File 物件為 key 的縮圖快取
@@ -1153,7 +1154,7 @@ function goHome() {
 }
 function resetTool() {
   files = [];
-  downloads = [];
+  downloads = []; lastMeta = null; lastRemind = null;
   pageOrder = [];
   pageThumbs = [];
   fileThumbMap.clear();
@@ -1524,24 +1525,31 @@ async function buildSubsetPdf(srcDoc, srcBytes, indices) {
 
 function showResult(items, metaText, remindText) {
   downloads = items;
+  lastMeta = (typeof metaText === "function") ? metaText : () => (metaText || "");
+  lastRemind = (remindText == null) ? null : ((typeof remindText === "function") ? remindText : () => remindText);
+  renderResultBody();
+  document.getElementById("resultBox").style.display = "block";
+  document.getElementById("progress").style.display = "none";
+  document.getElementById("resultBox").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function renderResultBody() {
   const dlBox = document.getElementById("dlButtons");
   dlBox.innerHTML = "";
-  items.forEach(it => {
+  downloads.forEach(it => {
     const a = document.createElement("a");
     a.className = "btn-dl";
-    a.textContent = items.length > 1 ? t("ui.dlNamed", { name: it.filename }) : t("ui.dl");
+    a.textContent = downloads.length > 1 ? t("ui.dlNamed", { name: it.filename }) : t("ui.dl");
     a.href = URL.createObjectURL(it.blob);
     a.download = it.filename;
     dlBox.appendChild(a);
   });
-  document.getElementById("resultMeta").textContent = metaText || "";
+  document.getElementById("resultMeta").textContent = lastMeta ? lastMeta() : "";
   const rem = document.getElementById("resultRemind");
-  if (remindText) { rem.textContent = "🔑 " + remindText; rem.style.display = "block"; }
+  const rt = lastRemind ? lastRemind() : null;
+  if (rt) { rem.textContent = "🔑 " + rt; rem.style.display = "block"; }
   else { rem.style.display = "none"; }
-  renderContinueBar(items);
-  document.getElementById("resultBox").style.display = "block";
-  document.getElementById("progress").style.display = "none";
-  document.getElementById("resultBox").scrollIntoView({ behavior: "smooth", block: "center" });
+  renderContinueBar(downloads);
 }
 
 /* ================= 結果頁「接著做」續作列 ================= */
@@ -1891,8 +1899,7 @@ async function doReorder() {
   setProgress(90, t("m.out"));
   const blob = new Blob([bytes], { type: "application/pdf" });
   const changed = pageOrder.some((v, i) => v !== i);
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.ro") + ".pdf" }],
-    t(changed ? "r.ro" : "r.roSame", { n: pageOrder.length }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.ro") + ".pdf" }], () => (t(changed ? "r.ro" : "r.roSame", { n: pageOrder.length }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 合併 ---------------- */
@@ -1908,8 +1915,7 @@ async function doMerge() {
   setProgress(95, t("m.out"));
   const bytes = await out.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: t("f.merge") + ".pdf" }],
-    t("r.merge", { n: files.length, p: out.getPageCount() }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: t("f.merge") + ".pdf" }], () => (t("r.merge", { n: files.length, p: out.getPageCount() }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 分割 ---------------- */
@@ -1935,14 +1941,13 @@ async function doSplit() {
     items.push({ blob: new Blob([bytes], { type: "application/pdf" }), filename: `${name}_${label}.pdf` });
   }
   if (items.length === 1) {
-    showResult(items, t("r.split1", { n: total }));
+    showResult(items, () => (t("r.split1", { n: total })));
   } else {
     setProgress(95, t("m.zip"));
     const zip = new JSZip();
     items.forEach(it => zip.file(it.filename, it.blob));
     const zblob = await zip.generateAsync({ type: "blob" });
-    showResult([{ blob: zblob, filename: `${name}_${t("f.splitZip")}.zip` }],
-      t("r.splitN", { n: items.length }) + " · " + fmtSize(zblob.size));
+    showResult([{ blob: zblob, filename: `${name}_${t("f.splitZip")}.zip` }], () => (t("r.splitN", { n: items.length }) + " · " + fmtSize(zblob.size)));
   }
 }
 
@@ -1974,8 +1979,7 @@ async function doCompress() {
   const bytes = await out.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
   const saved = Math.max(0, Math.round((1 - blob.size / origSize) * 100));
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.comp") + ".pdf" }],
-    t("r.comp", { a: fmtSize(origSize), b: fmtSize(blob.size), s: saved }));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.comp") + ".pdf" }], () => (t("r.comp", { a: fmtSize(origSize), b: fmtSize(blob.size), s: saved })));
 }
 
 /* ---------------- PDF → JPG ---------------- */
@@ -2000,14 +2004,13 @@ async function doPdf2Jpg() {
     imgs.push({ blob, filename: `${name}_${t("f.jpgPage", { n: i })}.jpg` });
   }
   if (imgs.length === 1) {
-    showResult(imgs, t("r.jpg1") + " · " + fmtSize(imgs[0].blob.size));
+    showResult(imgs, () => (t("r.jpg1") + " · " + fmtSize(imgs[0].blob.size)));
   } else {
     setProgress(95, t("m.zip"));
     const zip = new JSZip();
     imgs.forEach(it => zip.file(it.filename, it.blob));
     const zblob = await zip.generateAsync({ type: "blob" });
-    showResult([{ blob: zblob, filename: `${name}_${t("f.imgZip")}.zip` }],
-      t("r.jpgN", { n: imgs.length }) + " · " + fmtSize(zblob.size));
+    showResult([{ blob: zblob, filename: `${name}_${t("f.imgZip")}.zip` }], () => (t("r.jpgN", { n: imgs.length }) + " · " + fmtSize(zblob.size)));
   }
 }
 
@@ -2034,8 +2037,7 @@ async function doImg2Pdf() {
   setProgress(95, t("m.out"));
   const bytes = await out.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: t("f.imgPdf") + ".pdf" }],
-    t("r.img", { n: files.length }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: t("f.imgPdf") + ".pdf" }], () => (t("r.img", { n: files.length }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 旋轉 ---------------- */
@@ -2052,8 +2054,7 @@ async function doRotate() {
   setProgress(90, t("m.out"));
   const bytes = await doc.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.rot") + ".pdf" }],
-    t("r.rot", { n: targets.length }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.rot") + ".pdf" }], () => (t("r.rot", { n: targets.length }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 裁剪 ---------------- */
@@ -2080,8 +2081,7 @@ async function doCrop() {
   setProgress(90, t("m.out"));
   const bytes = await doc.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.crop") + ".pdf" }],
-    t("r.crop", { n: targets.length }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.crop") + ".pdf" }], () => (t("r.crop", { n: targets.length }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 修復(輕度:重建結構) ---------------- */
@@ -2099,8 +2099,7 @@ async function doRepair() {
   setProgress(80, t("m.repairOut"));
   const bytes = await doc.save({ useObjectStreams: false });
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.rep") + ".pdf" }],
-    t("r.rep", { n: doc.getPageCount() }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.rep") + ".pdf" }], () => (t("r.rep", { n: doc.getPageCount() }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 刪除頁面 ---------------- */
@@ -2116,8 +2115,7 @@ async function doDelete() {
   const bytes = await buildSubsetPdf(doc, srcBytes, keep);
   setProgress(90, t("m.out"));
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.del") + ".pdf" }],
-    t("r.del", { d: del.length, k: keep.length }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.del") + ".pdf" }], () => (t("r.del", { d: del.length, k: keep.length }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 擷取頁面 ---------------- */
@@ -2131,8 +2129,7 @@ async function doExtract() {
   const bytes = await buildSubsetPdf(doc, srcBytes, sel);
   setProgress(90, t("m.out"));
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.ext") + ".pdf" }],
-    t("r.ext", { n: sel.length }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.ext") + ".pdf" }], () => (t("r.ext", { n: sel.length }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 頁碼 ---------------- */
@@ -2159,8 +2156,7 @@ async function doPageNum() {
   setProgress(90, t("m.out"));
   const bytes = await doc.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.pn") + ".pdf" }],
-    t("r.pn", { n: total }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.pn") + ".pdf" }], () => (t("r.pn", { n: total }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 浮水印(文字任何語言 / Logo 圖片) ---------------- */
@@ -2261,8 +2257,7 @@ async function doWatermark() {
   setProgress(90, t("m.out"));
   const bytes = await doc.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.wm") + ".pdf" }],
-    t(type === "text" ? "r.wmT" : "r.wmL", { n: doc.getPageCount() }) + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.wm") + ".pdf" }], () => (t(type === "text" ? "r.wmT" : "r.wmL", { n: doc.getPageCount() }) + " · " + fmtSize(blob.size)));
 }
 
 /* ---------------- 鎖定/解鎖:qpdf WASM 引擎 ---------------- */
@@ -2327,9 +2322,7 @@ async function doProtect() {
     throw new Error(t("e.qpdfFail") + (r.stderr ? r.stderr.split("\n")[0] : ""));
   setProgress(90, t("m.out"));
   const blob = new Blob([r.out], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.lock") + ".pdf" }],
-    t(chipState.lockMode === "restrict" ? "r.lockR" : "r.lockO") + " · " + fmtSize(blob.size),
-    t("r.lockRemind"));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.lock") + ".pdf" }], () => (t(chipState.lockMode === "restrict" ? "r.lockR" : "r.lockO") + " · " + fmtSize(blob.size)), () => (t("r.lockRemind")));
 }
 
 async function doUnlock() {
@@ -2346,8 +2339,7 @@ async function doUnlock() {
   }
   setProgress(90, t("m.out"));
   const blob = new Blob([r.out], { type: "application/pdf" });
-  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.unlock") + ".pdf" }],
-    t("r.unlockPerm") + " · " + fmtSize(blob.size));
+  showResult([{ blob, filename: baseName(files[0].name) + "_" + t("f.unlock") + ".pdf" }], () => (t("r.unlockPerm") + " · " + fmtSize(blob.size)));
 }
 
 /* ================= 整理 PDF:合併 + 排序 + 刪頁 統一畫布 ================= */
@@ -2635,8 +2627,7 @@ async function doOrganize(){
   setProgress(95, t("m.out"));
   const bytes = await out.save();
   const blob = new Blob([bytes], { type: "application/pdf" });
-  showResult([{ blob, filename: t("f.organize") + ".pdf" }],
-    t("r.organize", { p: orgPages.length, n: used.size }) + " \u00B7 " + fmtSize(blob.size));
+  showResult([{ blob, filename: t("f.organize") + ".pdf" }], () => (t("r.organize", { p: orgPages.length, n: used.size }) + " \u00B7 " + fmtSize(blob.size)));
 }
 
 /* ---------------- 初始化 ---------------- */
